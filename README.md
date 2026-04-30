@@ -23,3 +23,11 @@ Output figures from analysis.
 #### results
 
 Output data from analysis
+
+### File naming conventions (for internal reference)
+
+- For any file with a date, use YYYYMMDD (no spaces, no hyphens)
+- No spaces in file names
+- Lower case unless specific uppercase use
+- Use _ in between words/date
+- for scripts, use primarily .R, please comment so it's understandable by others
