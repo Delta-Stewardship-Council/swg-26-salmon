@@ -34,7 +34,7 @@ Output data from analysis
 
 ### Datasheet suggestions
 
-- Dates are in YYYY/MM/DD format (or YYYY-MM-DD, we can change it)
+- Dates are in YYYY-MM-DD format
 - Column for water year and calendar year
 - All lowercase, periods between words (e.g., water.year)
 - Date and time columns would need to be separated (times should be in 24h time)
