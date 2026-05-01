@@ -1,6 +1,8 @@
 
 ## This is a modified version of the 20231220_errdap_download_script.R script for our data processing purposes
 
+## additional details: https://oceanview.pfeg.noaa.gov/CalFishTrack/
+
 ## load packages
 library(rerddap)
 library(ggplot2)
@@ -26,14 +28,27 @@ recvs <- tabledap('FED_JSATS_receivers', url = "https://oceanview.pfeg.noaa.gov/
 unique_studies <- unique(fish[,c("study_id","email")])
 
 ## Find relevant studies
-feather_river_studies = subset(unique_studies, startsWith(study_id, "FR"))$study_id
-feather_river_spring_studies = subset(unique_studies, startsWith(study_id, "FR_Spring"))$study_id
+feather_river_spring_studies = c("FR_Spring_2013", "FR_Spring_2014", "FR_Spring_2015",
+                                 "FR_Spring_2019", "FR_Spring_2020", "FR_Spring_2021", 
+                                 "FR_Spring_2023", "FR_Spring_2024", "FR_Spring_2025",
+                                 "FR_Spring_Delta_2013", "FR_Spring_Delta_2014", "FR_Spring_Delta_2015")
+#feather_river_spring_studies = subset(unique_studies, startsWith(study_id, "FR_Spring"))$study_id
+
+feather_river_fall_studies = c("FR_Fall_2012", "FR_Fall_Chinook_2023", "FRH_Fall_2021", "FRW_Fall_2021")
+#feather_river_studies = subset(unique_studies, startsWith(study_id, "FR"))$study_id
+#feather_river_spring_studies = subset(unique_studies, startsWith(study_id, "FR_Spring"))$study_id
+#feather_river_fall_studies = feather_river_studies[!(feather_river_studies %in% feather_river_spring_studies)]
+
+nimbus_studies = c("Nimbus_Fall_2016", "Nimbus_Fall_2017", "Nimbus_Fall_2018", "Nimbus_Fall_2022",
+                   "Nimbus_Fall_2023", "Nimbus_Fall_2024", "Nimbus_Fall_2025")
+#nimbus_studies = subset(unique_studies, startsWith(study_id, "Nimbus"))$study_id
+
+yuba_studies = c("Lower_Yuba_FRH_Chinook_2021", "Lower_Yuba_FRH_Chinook_2022", "Lower_Yuba_FRH_Chinook_2023", "Lower_Yuba_FRH_Chinook_2024")
+
 
 ## Decide which studies to pull full detection data for
-studyids <- c(feather_river_spring_studies) 
-
-## This will tell you unique receiver_general_location (a unifying name describing 1 location covered by 1 or more individual receivers)
-unique_genlocs <- tabledap('FED_JSATS_detects', url = "https://oceanview.pfeg.noaa.gov/erddap/", fields = c("receiver_general_location"), distinct = T)
+## (the rest of the script focuses on the studies in this vector)
+studyids <- c(yuba_studies) 
 
 
 #### DOWNLOAD DETECTION DATA FOR RELEVANT STUDIES ####
@@ -53,29 +68,42 @@ rm(datalist) #remove big object
 
 #### MAKE DATA NICE ####
 
-## First, lets format first and last time so R reads it as a Posixct time
+## format time
 dat$first_time <- as.POSIXct(dat$first_time, origin = '1970-01-01', format = "%Y-%m-%d %H:%M:%OS", tz = "Etc/GMT+8")
 dat$last_time <- as.POSIXct(dat$last_time, origin = '1970-01-01', format = "%Y-%m-%d %H:%M:%OS", tz = "Etc/GMT+8")
 
-## Associate detection data to tagging data ##
+## Associate detection data to tagging data 
 dat_fish <- merge(dat, fish, by = c("study_id", "fish_id"))
 
 ## Associate detection data to receiver data
 dat_fish_recv <- merge(dat_fish, recvs, by = "dep_id")
 
+## remove big objects from workspace
+rm(dat); rm(dat_fish)
+
+## make sure formatting is correct
+dat_fish_recv$latitude <- as.numeric(dat_fish_recv$latitude)
+dat_fish_recv$longitude <- as.numeric(dat_fish_recv$longitude)
+
+## For convenience, pull out fish data specific to studies of interest
+fish_of_interest = subset(fish, study_id %in% studyids)
+
+## Find unique release locations
+unique_release_locs = subset(fish_of_interest, !duplicated(release_location))[, c("release_location", "release_longitude", "release_latitude", "release_river_km")]
+
 #### Find first, last, and count of detections per fish per general location ####
-detect_minmaxcount <- aggregate(data=dat, first_time~study_id+ fish_id+ receiver_general_location, FUN=min)
-detect_minmaxcount <- merge(detect_minmaxcount, aggregate(data=dat, last_time~study_id+ fish_id+ receiver_general_location, FUN=max))
-detect_minmaxcount <- merge(detect_minmaxcount, aggregate(data=dat, detection_count~study_id+ fish_id+ receiver_general_location, FUN=sum))
-detect_minmaxcount <- detect_minmaxcount[order(detect_minmaxcount$fish_id, detect_minmaxcount$first_time),]
+#detect_minmaxcount <- aggregate(data=dat, first_time~study_id+ fish_id+ receiver_general_location, FUN=min)
+#detect_minmaxcount <- merge(detect_minmaxcount, aggregate(data=dat, last_time~study_id+ fish_id+ receiver_general_location, FUN=max))
+#detect_minmaxcount <- merge(detect_minmaxcount, aggregate(data=dat, detection_count~study_id+ fish_id+ receiver_general_location, FUN=sum))
+#detect_minmaxcount <- detect_minmaxcount[order(detect_minmaxcount$fish_id, detect_minmaxcount$first_time),]
 
 
 #### Make a map of detection locations ####
-## first format some fields as necessary
-dat_fish_recv$latitude <- as.numeric(dat_fish_recv$latitude)
-dat_fish_recv$longitude <- as.numeric(dat_fish_recv$longitude)
-## summarize data by unique fish visits per receiver general location
+
+## summarize across all studies by unique fish visits per receiver general location
 detect_summary <- aggregate(list(fish_count = dat_fish_recv$fish_id), by = list(receiver_general_location = dat_fish_recv$receiver_general_location.x, latitude = dat_fish_recv$receiver_general_latitude, longitude = dat_fish_recv$receiver_general_longitude), function(x){length(unique(x))})
+
+## for each study, summarize data by unique fish visits per receiver general location
 detect_summary_study <- aggregate(list(fish_count = dat_fish_recv$fish_id), by = list(study_id = dat_fish_recv$study_id, receiver_general_location = dat_fish_recv$receiver_general_location.x, latitude = dat_fish_recv$receiver_general_latitude, longitude = dat_fish_recv$receiver_general_longitude), function(x){length(unique(x))})
 
 
@@ -96,31 +124,44 @@ ggplot() +
   coord_fixed(1.3, xlim = xlim, ylim = ylim) +
   ggtitle("Location of study detections w/ count of unique fish visits")
 
-## only receivers with > 1000 unique fish observations across all studies
-ggplot() +
-  geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = "grey80") +
-  geom_path(data = rivers, aes(x = long, y = lat, group = group), size = 1, color = "white", lineend = "round") +
-  geom_point(data = subset(detect_summary, fish_count > 1000), aes(x = longitude, y = latitude), shape=23, fill="blue", color="darkred", size=1) +
-  geom_text_repel(data = subset(detect_summary, fish_count > 1000), aes(x = longitude, y = latitude, label = fish_count), max.overlaps = 30) +
-  theme_bw() + ylab("latitude") + xlab("longitude") +
-  coord_fixed(1.3, xlim = xlim, ylim = ylim) +
-  ggtitle("Location of study detections w/ count of unique fish visits")
-
 ## facet_wrap by study
-detect_summmary_study1 = subset(detect_summary_study,   study_id %in% feather_river_spring_studies[1:4])
-detect_summmary_study2 = subset(detect_summary_study,  study_id %in% feather_river_spring_studies[5:8])
-detect_summmary_study3 = subset(detect_summary_study, study_id %in% feather_river_spring_studies[9:12])
+#detect_summmary_study1 = subset(detect_summary_study,   study_id %in% feather_river_spring_studies[1:4])
+#detect_summmary_study2 = subset(detect_summary_study,  study_id %in% feather_river_spring_studies[5:8])
+#detect_summmary_study3 = subset(detect_summary_study, study_id %in% feather_river_spring_studies[9:12])
+#ggplot() +
+#  geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = "grey80") +
+#  geom_path(data = rivers, aes(x = long, y = lat, group = group), size = 1, color = "white", lineend = "round") +
+#  geom_point(data = detect_summmary_study3, aes(x = longitude, y = latitude), shape=23, fill="blue", color="darkred", size=1) +
+#  #geom_text_repel(data = detect_summmary_study1, aes(x = longitude, y = latitude, label = fish_count), max.overlaps = 30) +
+#  facet_wrap(~study_id, nrow = 1)+
+#  theme_bw() + ylab("latitude") + xlab("longitude") +
+#  coord_fixed(1.3, xlim = xlim, ylim = ylim) +
+#  ggtitle("Location of study detections w/ count of unique fish visits")
+
+## unique release locations
 ggplot() +
   geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = "grey80") +
   geom_path(data = rivers, aes(x = long, y = lat, group = group), size = 1, color = "white", lineend = "round") +
-  geom_point(data = detect_summmary_study3, aes(x = longitude, y = latitude), shape=23, fill="blue", color="darkred", size=1) +
-  #geom_text_repel(data = detect_summmary_study1, aes(x = longitude, y = latitude, label = fish_count), max.overlaps = 30) +
-  facet_wrap(~study_id, nrow = 1)+
+  geom_point(data = unique_release_locs, aes(x = release_longitude, y = release_latitude), shape=23, fill="blue", color="darkred", size=2) +
+  geom_text_repel(data = unique_release_locs, aes(x = release_longitude, y = release_latitude, label = release_location), box.padding = 1, nudge_x = 4) +
   theme_bw() + ylab("latitude") + xlab("longitude") +
   coord_fixed(1.3, xlim = xlim, ylim = ylim) +
-  ggtitle("Location of study detections w/ count of unique fish visits")
+  ggtitle("Locations of releases")
 
 
+## for each study, plot release locations (for my own visualization purposes)
+#for(i in 1:nrow(unique_studies)){
+#  fish_study = subset(fish, study_id == unique_studies$study_id[i])
+#  releases_study = subset(fish_study, !duplicated(release_location))[, c("release_location", "release_longitude", "release_latitude", "release_river_km")]
+#  print(ggplot() +
+#    geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = "grey80") +
+#    geom_path(data = rivers, aes(x = long, y = lat, group = group), size = 1, color = "white", lineend = "round") +
+#    geom_point(data = releases_study, aes(x = release_longitude, y = release_latitude), shape=23, fill="blue", color="darkred", size=2) +
+#    geom_text_repel(data = releases_study, aes(x = release_longitude, y = release_latitude, label = release_location), box.padding = 1, nudge_x = 4) +
+#    theme_bw() + ylab("latitude") + xlab("longitude") +
+#    coord_fixed(1.3, xlim = xlim, ylim = ylim) +
+#    ggtitle(paste0(unique_studies$study_id[i], "; release locations")))
+#}
 
 #### DESCRIPTION: TAGGED FISH DATA ####
 ## First, a quick tutorial on important fields in the "FED_JSATS_taggedfish" dataset:
