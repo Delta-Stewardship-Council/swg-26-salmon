@@ -8,6 +8,7 @@ library(rerddap)
 library(ggplot2)
 library(mapdata)
 library(ggrepel)
+library(tidyr); library(dplyr)
 
 ## Clear cache to get newest data
 cache_delete_all()
@@ -34,6 +35,11 @@ feather_river_spring_studies = c("FR_Spring_2013", "FR_Spring_2014", "FR_Spring_
                                  "FR_Spring_Delta_2013", "FR_Spring_Delta_2014", "FR_Spring_Delta_2015")
 #feather_river_spring_studies = subset(unique_studies, startsWith(study_id, "FR_Spring"))$study_id
 
+feather_river_spring_studies_select = c("FR_Spring_2013", "FR_Spring_2014", "FR_Spring_2015",
+                                 "FR_Spring_2019", "FR_Spring_2020", "FR_Spring_2021", 
+                                 "FR_Spring_2023", "FR_Spring_2024", "FR_Spring_2025")
+
+
 feather_river_fall_studies = c("FR_Fall_2012", "FR_Fall_Chinook_2023", "FRH_Fall_2021", "FRW_Fall_2021")
 #feather_river_studies = subset(unique_studies, startsWith(study_id, "FR"))$study_id
 #feather_river_spring_studies = subset(unique_studies, startsWith(study_id, "FR_Spring"))$study_id
@@ -43,12 +49,12 @@ nimbus_studies = c("Nimbus_Fall_2016", "Nimbus_Fall_2017", "Nimbus_Fall_2018", "
                    "Nimbus_Fall_2023", "Nimbus_Fall_2024", "Nimbus_Fall_2025")
 #nimbus_studies = subset(unique_studies, startsWith(study_id, "Nimbus"))$study_id
 
-yuba_studies = c("Lower_Yuba_FRH_Chinook_2021", "Lower_Yuba_FRH_Chinook_2022", "Lower_Yuba_FRH_Chinook_2023", "Lower_Yuba_FRH_Chinook_2024")
+#yuba_studies = c("Lower_Yuba_FRH_Chinook_2021", "Lower_Yuba_FRH_Chinook_2022", "Lower_Yuba_FRH_Chinook_2023", "Lower_Yuba_FRH_Chinook_2024")
 
 
 ## Decide which studies to pull full detection data for
 ## (the rest of the script focuses on the studies in this vector)
-studyids <- c(yuba_studies) 
+studyids <- c(feather_river_spring_studies_select) 
 
 
 #### DOWNLOAD DETECTION DATA FOR RELEVANT STUDIES ####
@@ -97,6 +103,14 @@ unique_release_locs = subset(fish_of_interest, !duplicated(release_location))[, 
 #detect_minmaxcount <- merge(detect_minmaxcount, aggregate(data=dat, detection_count~study_id+ fish_id+ receiver_general_location, FUN=sum))
 #detect_minmaxcount <- detect_minmaxcount[order(detect_minmaxcount$fish_id, detect_minmaxcount$first_time),]
 
+### Fun initial analyses: for spring run feather river releases, classify fish by if they were detected out of the feather river or not
+out_feather_dat = subset(dat_fish_recv, !(receiver_region %in% c("Feather_R", "Yuba R")))
+fish_of_interest$survived.feather = ifelse(fish_of_interest$fish_id %in% unique(out_feather_dat$fish_id), 1, 0)
+survived_by_study = fish_of_interest %>% group_by(study_id) %>% summarize(feather.survival.prob = mean(survived.feather))
+ggplot(survived_by_study) + 
+  geom_col(aes(y = study_id, x = feather.survival.prob)) +
+  theme_classic()
+
 
 #### Make a map of detection locations ####
 
@@ -123,6 +137,18 @@ ggplot() +
   theme_bw() + ylab("latitude") + xlab("longitude") +
   coord_fixed(1.3, xlim = xlim, ylim = ylim) +
   ggtitle("Location of study detections w/ count of unique fish visits")
+
+
+## feather river
+ggplot() +
+  geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = "grey80") +
+  geom_path(data = rivers, aes(x = long, y = lat, group = group), size = 1, color = "white", lineend = "round") +
+  geom_point(data = subset(recvs, receiver_region %in% c("Feather_R", "Yuba R")), aes(x = longitude, y = latitude), shape=23, fill="blue", color="darkred", size=1) +
+  geom_point(data = subset(recvs, !receiver_region %in% c("Feather_R", "Yuba R")), aes(x = longitude, y = latitude), shape=23, fill="black", color="black", size=1) +
+  theme_bw() + ylab("latitude") + xlab("longitude") +
+  coord_fixed(1.3, xlim = c(-122, -121), ylim = c(38.5, 39.7)) +
+  ggtitle("Location of study detections w/ count of unique fish visits")
+
 
 ## facet_wrap by study
 #detect_summmary_study1 = subset(detect_summary_study,   study_id %in% feather_river_spring_studies[1:4])
