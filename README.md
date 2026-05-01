@@ -31,3 +31,10 @@ Output data from analysis
 - Lower case unless specific uppercase use
 - Use _ in between words/date
 - for scripts, use primarily .R, please comment so it's understandable by others
+
+### Datasheet suggestions
+
+- Dates are in YYYY/MM/DD format (or YYYY-MM-DD, we can change it)
+- Column for water year and calendar year
+- All lowercase, periods between words (e.g., water.year)
+- Date and time columns would need to be separated (times should be in 24h time)
