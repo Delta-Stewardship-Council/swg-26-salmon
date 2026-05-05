@@ -99,10 +99,6 @@ amer_catch_lub_clean <- amer_catch_lub %>% clean_names(case = "snake") %>%
 
 table(month(amer_catch_lub_clean$date, label = TRUE))
 
-#exporting clean tidy data
-
-write.csv(amer_catch_lub_clean, "salmon/tidy_data/amer_catch_tidy.csv", row.names = FALSE)
-
 ```
 
 # standardize column header names across the RST locations 
@@ -114,6 +110,10 @@ amer_catch_lub_clean <- amer_catch_lub_clean %>% rename(count = n)
 amer_enviro_lub_clean <- amer_enviro_lub_clean %>% rename(station = sub.site.name)
 ```
 
+# export clean catch data 
+```{r}
+write.csv(amer_catch_lub_clean, "salmon/tidy_data/amer_catch_tidy.csv", row.names = FALSE)
+```
 
 # Join tidy enviro and catch data 
 
