@@ -87,12 +87,6 @@ stan_oakdale_enviro_lub_clean <- stan_oakdale_enviro_lub %>% clean_names(case = 
   rename_with(~ gsub("_", ".", .x))
 
     table(month(stan_oakdale_enviro_lub_clean$date, label = TRUE))
-
-#exporting clean tidy data
-
-write.csv(stan_caswell_enviro_lub_clean, "salmon/tidy_data/stan_caswell_environmentals_tidy.csv", row.names = FALSE)
-
-write.csv(stan_oakdale_enviro_lub_clean, "salmon/tidy_data/stan_oakdale_environmentals_tidy.csv", row.names = FALSE)
 ```
 
 # Tidying chinook catch data 
@@ -206,6 +200,12 @@ stan_oakdale_catch_lub_clean <- stan_oakdale_catch_lub_clean %>%
 write.csv(stan_caswell_catch_lub_clean, "salmon/tidy_data/stan_caswell_catch_tidy.csv", row.names = FALSE)
 
 write.csv(stan_oakdale_catch_lub_clean, "salmon/tidy_data/stan_oakdale_catch_tidy.csv", row.names = FALSE)
+
+#exporting clean tidy data
+
+write.csv(stan_caswell_enviro_lub_clean, "salmon/tidy_data/stan_caswell_environmentals_tidy.csv", row.names = FALSE)
+
+write.csv(stan_oakdale_enviro_lub_clean, "salmon/tidy_data/stan_oakdale_environmentals_tidy.csv", row.names = FALSE)
 ```
 
 # Join tidy enviro and catch data 

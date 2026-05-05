@@ -1,4 +1,4 @@
-"method.code","station.code","date","time","batch.date","weather.code","water.temperature","turbidity","water.velocity","dissolved.oxygen","electrical.conductivity","calendar.year","water.year"
+"method.code","station","date","time","batch.date","weather.code","water.temperature","turbidity","water.velocity","dissolved.oxygen","electrical.conductivity","calendar.year","water.year"
 "RSTR","ST040X",2023-06-23,09:40:00,2023-06-23,"CLR",51.8,2.54,1.7,10.81,58,2023,2023
 "RSTR","ST040X",2023-06-22,09:49:00,2023-06-22,"CLR",NA,2.37,2,NA,61.2,2023,2023
 "RSTR","ST040X",2023-06-21,10:00:00,2023-06-21,"CLR",NA,2.6,2.1,NA,61.1,2023,2023

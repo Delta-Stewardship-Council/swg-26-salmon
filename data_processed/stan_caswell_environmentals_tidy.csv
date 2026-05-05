@@ -1,4 +1,4 @@
-"date","trap.visit.id","sub.site.name","turbidity","water.vel","dissolved.oxygen","water.depth","environmental.comments","calendar.year","water.year"
+"date","trap.visit.id","station","turbidity","water.vel","dissolved.oxygen","water.depth","environmental.comments","calendar.year","water.year"
 2017-02-01,8302,"ST004L1",NA,NA,NA,153,"Water velocity not recorded.",2017,2017
 2017-02-02,8303,"ST004L1",NA,NA,NA,145,"Water temp not recorded. Turbidity not recorded. D.O. not recorded. Water velocity not recorded.",2017,2017
 2017-02-03,8304,"ST004L1",4.51,NA,NA,140,"Water temp not recorded. D.O. not recorded. Water velocity not recorded.",2017,2017
