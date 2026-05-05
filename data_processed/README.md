@@ -1,7 +1,7 @@
 
-American river RST data processing: 
+American river RST and Stanislaus river RST data processing: 
 
-20260504
+20260505
 
 raw data was read into positron and processed using R 
 date was changed to YYYY-MM-DD
