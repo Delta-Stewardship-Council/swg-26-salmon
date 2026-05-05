@@ -1,0 +1,252 @@
+---
+title: "Stanislaus RST data cleaning"
+format: html
+Author: "Marelle"
+---
+
+# Set up 
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(plotly)
+library(readr)
+library(here)
+library(tidyverse)
+library(lubridate)
+library(janitor)
+```
+
+# Read in data 
+```{r}
+stan_caswell_catch <- read_csv(here("salmon/raw_data/stan_rawcatch_chinook_caswell.csv"))
+stan_caswell_enviro <- read_csv(here("salmon/raw_data/stan_environmentals_caswell.csv"))
+stan_oakdale_catch <- read_csv(here("salmon/raw_data/stan_rawcatch_chinook_oakdale.csv"))
+stan_oakdale_enviro <- read_csv(here("salmon/raw_data/stan_environmentals_oakdale.csv"))
+```
+
+
+# Tidying enviro data 
+```{r}
+#changing date to YYYY-MM-DD
+
+stan_caswell_enviro$Date <- format(as.Date(stan_caswell_enviro$Date, format = "%m/%d/%Y"), "%Y-%m-%d")
+
+stan_oakdale_enviro$SampleDate <- format(as.Date(stan_oakdale_enviro$SampleDate, format = "%m/%d/%Y"),
+"%Y-%m-%d")
+#adding column for calendar year and water year
+
+stan_caswell_enviro_lub <- stan_caswell_enviro %>%
+  mutate(
+    Date = ymd(Date),  # converts character to Date
+    calendar.year = year(Date),
+    water.year = if_else(month(Date) >= 10,
+                         year(Date) + 1,
+                         year(Date))
+  )
+
+#rename "SampleDate" to "date" and "SampleTime" to "time"
+
+stan_oakdale_enviro <- stan_oakdale_enviro %>% rename(date = SampleDate)
+stan_oakdale_enviro <- stan_oakdale_enviro %>% rename(time = SampleTime)
+
+#adding column for calendar year and water year
+
+stan_oakdale_enviro_lub <- stan_oakdale_enviro %>%
+  mutate(
+    date = ymd(date),  # converts character to Date
+    calendar.year = year(date),
+    water.year = if_else(month(date) >= 10,
+                         year(date) + 1,
+                         year(date))
+  )
+
+#remove decimal from year columns 
+
+stan_caswell_enviro_lub  <- stan_caswell_enviro_lub %>%
+  mutate(water.year = as.integer(water.year))
+
+stan_caswell_enviro_lub  <- stan_caswell_enviro_lub %>%
+  mutate(water.year = as.integer(calendar.year))
+
+stan_oakdale_enviro_lub <- stan_oakdale_enviro_lub  %>%
+  mutate(calendar.year = as.integer(calendar.year))
+
+stan_oakdale_enviro_lub <- stan_oakdale_enviro_lub  %>%
+  mutate(calendar.year = as.integer(water.year))
+
+#updating column header names to be uniform (all lowercase, periods between words)
+
+stan_caswell_enviro_lub_clean <- stan_caswell_enviro_lub %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+    table(month(stan_caswell_enviro_lub_clean$date, label = TRUE))
+
+stan_oakdale_enviro_lub_clean <- stan_oakdale_enviro_lub %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+    table(month(stan_oakdale_enviro_lub_clean$date, label = TRUE))
+
+#exporting clean tidy data
+
+write.csv(stan_caswell_enviro_lub_clean, "salmon/tidy_data/stan_caswell_environmentals_tidy.csv", row.names = FALSE)
+
+write.csv(stan_oakdale_enviro_lub_clean, "salmon/tidy_data/stan_oakdale_environmentals_tidy.csv", row.names = FALSE)
+```
+
+# Tidying chinook catch data 
+
+```{r}
+
+#rename "SampleDate" to "date" and "SampleTime" to "time"
+
+stan_oakdale_catch <- stan_oakdale_catch %>% rename(date = SampleDate)
+stan_oakdale_catch <- stan_oakdale_catch %>% rename(time = SampleTime)
+
+# format date
+
+stan_oakdale_catch$date <- format(as.Date(stan_oakdale_catch$date, format = "%m/%d/%Y"), "%Y-%m-%d")
+
+stan_caswell_catch$Date <- format(as.Date(stan_caswell_catch$Date, format = "%m/%d/%Y"), "%Y-%m-%d")
+
+#adding column for calendar year and water year
+
+stan_caswell_catch_lub <- stan_caswell_catch %>%
+  mutate(
+    Date = ymd(Date),  # converts character to Date
+    calendar.year = year(Date),
+    water.year = if_else(month(Date) >= 10,
+                         year(Date) + 1,
+                         year(Date))
+  )
+
+
+stan_oakdale_catch_lub <- stan_oakdale_catch %>%
+  mutate(
+    date = ymd(date),  # converts character to Date
+    calendar.year = year(date),
+    water.year = if_else(month(date) >= 10,
+                         year(date) + 1,
+                         year(date))
+  )
+
+
+#remove decimal from year columns 
+
+stan_oakdale_catch_lub <- stan_oakdale_catch_lub %>%
+  mutate(water.year = as.integer(water.year))
+
+stan_oakdale_catch_lub <- stan_oakdale_catch_lub%>%
+  mutate(calendar.year = as.integer(calendar.year))
+
+stan_caswell_catch_lub <- stan_caswell_catch_lub %>%
+  mutate(water.year = as.integer(water.year))
+
+stan_caswell_catch_lub <- stan_caswell_catch_lub%>%
+  mutate(calendar.year = as.integer(calendar.year))
+
+
+#updating column header names to be uniform (all lowercase, periods between words)
+
+stan_caswell_catch_lub_clean <- stan_caswell_catch_lub %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+table(month(stan_caswell_catch_lub_clean$date, label = TRUE))
+
+
+stan_oakdale_catch_lub_clean <- stan_oakdale_catch_lub %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+table(month(stan_oakdale_catch_lub_clean$date, label = TRUE))
+
+# change column header "n" to "count" to match other catch data sheets
+
+stan_caswell_catch_lub_clean <- stan_caswell_catch_lub_clean %>% rename(count = n)
+
+```
+
+# standardize column header names and cell contents across the RST locations 
+
+```{r}
+stan_oakdale_enviro_lub_clean <- stan_oakdale_enviro_lub_clean %>% rename(station = station.code)
+
+stan_caswell_enviro_lub_clean <- stan_caswell_enviro_lub_clean %>% rename(station = sub.site.name)
+
+stan_caswell_catch_lub_clean <- stan_caswell_catch_lub_clean %>%
+  rename(
+    species = common.name,
+    station = sub.site.name)
+
+stan_oakdale_catch_lub_clean <- stan_oakdale_catch_lub_clean %>%
+  rename(
+    species    = organism.code,
+    station    = station.code,
+    life.stage = stage.code,
+    mark.type  = mark.code,
+    mort       = dead,
+    release.id = release.code,
+    method     = method.code
+  )
+
+ stan_oakdale_catch_lub_clean  <- stan_oakdale_catch_lub_clean %>%
+ mutate(species = "Chinook salmon")
+
+#note for future self - the life.stage for the oakdale trap uses a number system. Once I find out what lifestage corresponds to each number, we can recode to match the other datasheets species = recode(species, "CHN" = "Chinook salmon"),
+   # life.stage = recode(life.stage,
+    #  "1" = "Yolk-sac fry",
+    #  "2" = "Fry",
+    #  "3" = "Parr",
+    #  "4" = "Silvery parr",
+    #  "5" = "Smolt"
+
+
+#exporting clean tidy data
+
+write.csv(stan_caswell_catch_lub_clean, "salmon/tidy_data/stan_caswell_catch_tidy.csv", row.names = FALSE)
+
+write.csv(stan_oakdale_catch_lub_clean, "salmon/tidy_data/stan_oakdale_catch_tidy.csv", row.names = FALSE)
+```
+
+# Join tidy enviro and catch data 
+```{r}
+stan_caswell_combined <- stan_caswell_catch_lub_clean %>%
+  left_join(stan_caswell_enviro_lub_clean, by = c("date", "trap.visit.id", "station"))
+
+#check that left join worked correctly
+#number of fish records should match exactly
+nrow(stan_caswell_catch_lub_clean)      
+nrow(stan_caswell_combined)    
+
+# remove duplicate water year and calendar year columns after left_joing
+
+stan_caswell_combined <- stan_caswell_combined %>%
+  select(-calendar.year.y, -water.year.y) %>%
+  rename(
+    calendar.year = calendar.year.x,
+    water.year    = water.year.x
+  )
+
+# export combined file
+write.csv(stan_caswell_combined, "salmon/tidy_data/stan_caswell_combined.csv", row.names = FALSE)
+
+stan_oakdale_combined <- stan_oakdale_catch_lub_clean %>%
+  left_join(stan_oakdale_enviro_lub_clean, by = c("date", "time", "station"))
+
+#check that left join worked correctly
+#number of fish records should match exactly
+nrow(stan_oakdale_catch_lub_clean)      
+nrow(stan_oakdale_combined)   
+
+# remove duplicate water year and calendar year columns after left_joing
+
+stan_oakdale_combined <- stan_oakdale_combined %>%
+  select(-calendar.year.y, -water.year.y) %>%
+  rename(
+    calendar.year = calendar.year.x,
+    water.year    = water.year.x
+  )
+
+write.csv(stan_oakdale_combined, "salmon/tidy_data/stan_oakdale_combined.csv", row.names = FALSE)
+
+```
