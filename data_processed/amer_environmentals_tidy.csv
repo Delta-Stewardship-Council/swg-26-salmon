@@ -1,4 +1,4 @@
-"date","trap.visit.id","sub.site.name","turbidity","water.vel","dissolved.oxygen","water.depth","environmental.comments","calendar.year","water.year"
+"date","trap.visit.id","station","turbidity","water.vel","dissolved.oxygen","water.depth","environmental.comments","calendar.year","water.year"
 2014-01-07,321,"North Channel 8.1",NA,NA,NA,NA,"Environmental data not recorded.",2014,2014
 2014-01-08,322,"North Channel 8.1",2.39,0.88,13.05,NA,NA,2014,2014
 2014-01-09,323,"North Channel 8.1",1.74,1.04,12.66,NA,NA,2014,2014
