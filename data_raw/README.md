@@ -1,18 +1,46 @@
-Raw data download: 
+# American & Stanislaus River RST Raw Data Download
 
-American River RST data downloaded on 4/29/2026 from https://portal.edirepository.org/nis/mapbrowse?packageid=edi.1047.5
+## Overview
 
-Environmentals.csv renamed amer_environmentals.csv
+Raw rotary screw trap (RST) data for the **American River** and **Stanislaus River** were downloaded from the [EDI Data Repository](https://portal.edirepository.org/).
 
-Raw Catch - Chinook.csv renamed amer_raw_catch_chinook.csv
+---
 
-Stanislaus River RST data downloaded on 4/29/2026 
+## Download Date
 
-Caswell trap: https://portal.edirepository.org/nis/mapbrowse?packageid=edi.935.5
-Oakdale trap: https://portal.edirepository.org/nis/mapbrowse?packageid=edi.1863.1
+`2026-04-29`
 
-Raw Catch - Chinook.csv stan_raw_catch_chinook_caswell.csv
-Environmentals.csv renamed stan_environmentals_caswell.csv
+---
 
-Raw Catch-Chinook.csv renamed stan_raw_catch_chinook_oakdale.csv
-Environmentals.csv renamed stan_environmentals_oakdale.csv
+## American River
+
+**Source:** [EDI Package edi.1047.5](https://portal.edirepository.org/nis/mapbrowse?packageid=edi.1047.5)
+
+| Original Filename | Renamed To |
+|---|---|
+| `Environmentals.csv` | `amer_environmentals.csv` |
+| `Raw Catch - Chinook.csv` | `amer_raw_catch_chinook.csv` |
+
+---
+
+## Stanislaus River
+
+Data were downloaded from two trap locations.
+
+### Caswell Trap
+
+**Source:** [EDI Package edi.935.5](https://portal.edirepository.org/nis/mapbrowse?packageid=edi.935.5)
+
+| Original Filename | Renamed To |
+|---|---|
+| `Environmentals.csv` | `stan_environmentals_caswell.csv` |
+| `Raw Catch - Chinook.csv` | `stan_raw_catch_chinook_caswell.csv` |
+
+### Oakdale Trap
+
+**Source:** [EDI Package edi.1863.1](https://portal.edirepository.org/nis/mapbrowse?packageid=edi.1863.1)
+
+| Original Filename | Renamed To |
+|---|---|
+| `Environmentals.csv` | `stan_environmentals_oakdale.csv` |
+| `Raw Catch-Chinook.csv` | `stan_raw_catch_chinook_oakdale.csv` |
