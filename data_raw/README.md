@@ -1,8 +1,8 @@
-# American & Stanislaus River RST Raw Data Download
+# RST Raw Data Download
 
 ## Overview
 
-Raw rotary screw trap (RST) data for the **American River** and **Stanislaus River** were downloaded from the [EDI Data Repository](https://portal.edirepository.org/).
+Raw rotary screw trap (RST) data for the **American River**, **Stanislaus River**, and **Feather River** were downloaded from the [EDI Data Repository](https://portal.edirepository.org/).
 
 ---
 
@@ -44,3 +44,33 @@ Data were downloaded from two trap locations.
 |---|---|
 | `Environmentals.csv` | `stan_environmentals_oakdale.csv` |
 | `Raw Catch-Chinook.csv` | `stan_raw_catch_chinook_oakdale.csv` |
+
+---
+
+## Feather River
+
+Data were downloaded from two trap locations.
+
+### Upper Trap
+
+**Source:** [EDI Package edi.1239.28](https://portal.edirepository.org/nis/metadataviewer?packageid=edi.1239.28)
+
+| Original Filename | Renamed To |
+|---|---|
+| `feather_catch.csv` | `feat_catch_upper.csv` |
+| `feather_recapture.csv` | `feat_recapture_upper.csv` |
+| `feather_release.csv` | `feat_release_upper.csv` |
+| `feather_releasefish.csv` | `feat_releasefish_upper.csv` |
+| `feather_trap.csv` | `feat_trap_upper.csv` |
+
+### Lower Trap
+
+**Source:** [EDI Package edi.1500.14](https://portal.edirepository.org/nis/metadataviewer?packageid=edi.1500.14)
+
+| Original Filename | Renamed To |
+|---|---|
+| `lower_feather_catch.csv` | `feat_catch_lower.csv` |
+| `lower_feather_recapture.csv` | `feat_recapture_lower.csv` |
+| `lower_feather_release.csv` | `feat_release_lower.csv` |
+| `lower_feather_releasefish.csv` | `feat_releasefish_lower.csv` |
+| `lower_feather_trap.csv` | `feat_trap_lower.csv` |
