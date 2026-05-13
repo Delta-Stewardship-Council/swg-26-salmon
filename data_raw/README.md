@@ -37,6 +37,9 @@ Data were downloaded from two trap locations.
 |---|---|
 | `Environmentals.csv` | `stan_environmentals_caswell.csv` |
 | `Raw Catch - Chinook.csv` | `stan_raw_catch_chinook_caswell.csv` |
+| `Trap Efficiency Release FL.csv` | `stan_trap_efficiency_release_fl_caswell.csv` |
+| `Trap Operations.csv` | `stan_trap_operations_caswell.csv` |
+| `Trap Efficiency Summary.csv` | `stan_trap_efficiency_summary_caswell.csv` |
 
 ### Oakdale Trap
 
@@ -46,7 +49,7 @@ Data were downloaded from two trap locations.
 |---|---|
 | `Environmentals.csv` | `stan_environmentals_oakdale.csv` |
 | `Raw Catch-Chinook.csv` | `stan_raw_catch_chinook_oakdale.csv` |
-
+| `TrapOperations.csv` | `stan_trap_operations_oakdale.csv` |
 ---
 
 ## Feather River
