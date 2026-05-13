@@ -20,7 +20,9 @@ Raw rotary screw trap (RST) data for the **American River**, **Stanislaus River*
 |---|---|
 | `Environmentals.csv` | `amer_environmentals.csv` |
 | `Raw Catch - Chinook.csv` | `amer_raw_catch_chinook.csv` |
-
+| `Trap Operations.csv` | `amer_trap_operations.csv` |
+| `Trap Efficiency Release FL.csv` | `amer_trap_efficiency_release_fl.csv` |
+| `Trap Efficiency Summary.csv` | `amer_trap_efficiency_summary.csv` |
 ---
 
 ## Stanislaus River
