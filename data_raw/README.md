@@ -1,18 +1,76 @@
-Raw data download: 
+# RST Raw Data Download
 
-American River RST data downloaded on 4/29/2026 from https://portal.edirepository.org/nis/mapbrowse?packageid=edi.1047.5
+## Overview
 
-Environmentals.csv renamed amer_environmentals.csv
+Raw rotary screw trap (RST) data for the **American River**, **Stanislaus River**, and **Feather River** were downloaded from the [EDI Data Repository](https://portal.edirepository.org/).
 
-Raw Catch - Chinook.csv renamed amer_raw_catch_chinook.csv
+---
 
-Stanislaus River RST data downloaded on 4/29/2026 
+## Download Date
 
-Caswell trap: https://portal.edirepository.org/nis/mapbrowse?packageid=edi.935.5
-Oakdale trap: https://portal.edirepository.org/nis/mapbrowse?packageid=edi.1863.1
+`2026-04-29`
 
-Raw Catch - Chinook.csv stan_raw_catch_chinook_caswell.csv
-Environmentals.csv renamed stan_environmentals_caswell.csv
+---
 
-Raw Catch-Chinook.csv renamed stan_raw_catch_chinook_oakdale.csv
-Environmentals.csv renamed stan_environmentals_oakdale.csv
+## American River
+
+**Source:** [EDI Package edi.1047.5](https://portal.edirepository.org/nis/mapbrowse?packageid=edi.1047.5)
+
+| Original Filename | Renamed To |
+|---|---|
+| `Environmentals.csv` | `amer_environmentals.csv` |
+| `Raw Catch - Chinook.csv` | `amer_raw_catch_chinook.csv` |
+
+---
+
+## Stanislaus River
+
+Data were downloaded from two trap locations.
+
+### Caswell Trap
+
+**Source:** [EDI Package edi.935.5](https://portal.edirepository.org/nis/mapbrowse?packageid=edi.935.5)
+
+| Original Filename | Renamed To |
+|---|---|
+| `Environmentals.csv` | `stan_environmentals_caswell.csv` |
+| `Raw Catch - Chinook.csv` | `stan_raw_catch_chinook_caswell.csv` |
+
+### Oakdale Trap
+
+**Source:** [EDI Package edi.1863.1](https://portal.edirepository.org/nis/mapbrowse?packageid=edi.1863.1)
+
+| Original Filename | Renamed To |
+|---|---|
+| `Environmentals.csv` | `stan_environmentals_oakdale.csv` |
+| `Raw Catch-Chinook.csv` | `stan_raw_catch_chinook_oakdale.csv` |
+
+---
+
+## Feather River
+
+Data were downloaded from two trap locations.
+
+### Upper Trap
+
+**Source:** [EDI Package edi.1239.28](https://portal.edirepository.org/nis/metadataviewer?packageid=edi.1239.28)
+
+| Original Filename | Renamed To |
+|---|---|
+| `feather_catch.csv` | `feat_catch_upper.csv` |
+| `feather_recapture.csv` | `feat_recapture_upper.csv` |
+| `feather_release.csv` | `feat_release_upper.csv` |
+| `feather_releasefish.csv` | `feat_releasefish_upper.csv` |
+| `feather_trap.csv` | `feat_trap_upper.csv` |
+
+### Lower Trap
+
+**Source:** [EDI Package edi.1500.14](https://portal.edirepository.org/nis/metadataviewer?packageid=edi.1500.14)
+
+| Original Filename | Renamed To |
+|---|---|
+| `lower_feather_catch.csv` | `feat_catch_lower.csv` |
+| `lower_feather_recapture.csv` | `feat_recapture_lower.csv` |
+| `lower_feather_release.csv` | `feat_release_lower.csv` |
+| `lower_feather_releasefish.csv` | `feat_releasefish_lower.csv` |
+| `lower_feather_trap.csv` | `feat_trap_lower.csv` |
