@@ -112,6 +112,16 @@ ggplot(survived_by_study) +
   theme_classic()
 
 
+### Test wrapper function (does essentially the same as above)
+feather_spring_fish = download_process_telemetry(trib = 'feather', season = 'spring')
+
+survived_by_study = feather_spring_fish %>% group_by(study_id, release_location) %>% summarize(trib.survival.prob = mean(survived.trib), count = n())
+survived_by_study$lab = paste0("n = ", survived_by_study$count)
+ggplot(survived_by_study, aes(y = study_id, x = trib.survival.prob, fill = release_location)) + 
+  geom_col(position="dodge") +
+  geom_text(aes(label = lab), position = position_dodge(width = 1), hjust = -0.08) +
+  theme_classic() + labs(x = "Tributary Survival Probability", y = NULL) + xlim(c(0, .8))
+
 #### Make a map of detection locations ####
 
 ## summarize across all studies by unique fish visits per receiver general location
@@ -149,6 +159,16 @@ ggplot() +
   coord_fixed(1.3, xlim = c(-122, -121), ylim = c(38.5, 39.7)) +
   ggtitle("Location of study detections w/ count of unique fish visits")
 
+## specific fish
+my_fish_id = 'FR2013-072'#'FR2014-022'
+ggplot() + 
+  geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = "grey80") +
+  geom_path(data = rivers, aes(x = long, y = lat, group = group), size = 1, color = "white", lineend = "round") +
+  geom_point(data=subset(dat_fish_recv, fish_id == my_fish_id), aes(x = longitude, y = latitude))+
+  geom_path(data=subset(dat_fish_recv, fish_id == my_fish_id), aes(x = longitude, y = latitude))+
+  theme_bw() + ylab("latitude") + xlab("longitude") +
+  coord_fixed(1.3, xlim = xlim, ylim = ylim)+
+  ggtitle(paste0("Fish ID: ", my_fish_id))
 
 ## facet_wrap by study
 #detect_summmary_study1 = subset(detect_summary_study,   study_id %in% feather_river_spring_studies[1:4])
