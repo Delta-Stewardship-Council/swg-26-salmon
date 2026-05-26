@@ -1,0 +1,512 @@
+---
+title: "Feather RST Data"
+format: html
+---
+
+# Set Up
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(readr)
+library(here)
+library(janitor)
+library(lubridate)
+library(tidyverse)
+```
+
+# Read in data
+
+```{r}
+feat_upper_catch <- read_csv(here("data_raw/feat_catch_upper.csv"))
+feat_upper_recapture <- read_csv(here("data_raw/feat_recapture_upper.csv"))
+feat_upper_release <- read_csv(here("data_raw/feat_release_upper.csv"))
+feat_upper_releasefish <- read_csv(here("data_raw/feat_releasefish_upper.csv"))
+feat_upper_trap <- read_csv(here("data_raw/feat_trap_upper.csv"))
+feat_lower_catch <- read_csv(here("data_raw/feat_catch_lower.csv"))
+feat_lower_recapture <- read_csv(here("data_raw/feat_recapture_lower.csv"))
+feat_lower_release <- read_csv(here("data_raw/feat_release_lower.csv"))
+feat_lower_releasefish <- read_csv(here("data_raw/feat_releasefish_lower.csv"))
+feat_lower_trap <- read_csv(here("data_raw/feat_trap_lower.csv"))
+```
+
+# Tidying catch data
+
+```{r}
+
+# separate date and time from "visitTime" for upper feather
+
+feat_upper_catch <- feat_upper_catch %>%
+  mutate(
+    date = as.Date(visitTime),
+    time = hms::as_hms(visitTime)
+  ) %>%
+    select(-visitTime)
+
+
+# So I dont understand the difference bewteen "visitTime" and "visitTime2". They are the same except for the following 13 instances which looks like one sampling event.I'll reach out for a SOP and some explanations. I also need an explanation for how they derive "trap_start_date" and "trap_end_date" from  "visitTime" and "visitTime2. Sometimes they match sometimes they dont. 
+View(
+  feat_lower_catch %>%
+    filter(!(visitTime == visitTime2))
+)
+
+table(feat_lower_catch$visitTime == feat_lower_catch$visitTime2)
+
+ View(
+   feat_lower_catch %>%
+     filter(!(visitTime == trap_start_date))
+ )
+
+table(feat_lower_catch$visitTime == feat_lower_catch$trap_start_date)
+
+# separate date and time from "visitTime" only for now since it matches the the column in feat_upper. I'll change it to Date to match the other datasets.
+
+feat_lower_catch <- feat_lower_catch %>%
+  mutate(
+    date = as.Date(visitTime),
+    time = hms::as_hms(visitTime)
+  ) %>%
+    select(-visitTime, -visitTime2, -trap_start_date, -trap_end_date)
+
+#adding column for calendar year and water year
+feat_lower_catch <- feat_lower_catch %>%
+  mutate(
+    calendar.year = year(date),
+    water.year = if_else(month(date) >= 10,
+                         year(date) + 1,
+                         year(date))
+  )
+
+feat_upper_catch <- feat_upper_catch %>%
+  mutate(
+    calendar.year = year(date),
+    water.year = if_else(month(date) >= 10,
+                         year(date) + 1,
+                         year(date))
+  )
+
+
+# get rid of decimals
+feat_lower_catch <- feat_lower_catch %>%
+  mutate(across(c(ProjectDescriptionID,catchRawID, trapVisitID, releaseID,forkLength,totalLength,n,calendar.year, water.year ), as.integer))
+
+feat_upper_catch <- feat_upper_catch %>%
+  mutate(across(c(ProjectDescriptionID,catchRawID, trapVisitID, releaseID,forkLength,totalLength,n,calendar.year, water.year ), as.integer))
+
+
+#updating column header names to be uniform (all lowercase, periods betweem words)
+
+feat_lower_catch_clean <- feat_lower_catch %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+table(month(feat_lower_catch_clean$date, label = TRUE))
+
+feat_upper_catch_clean <- feat_upper_catch %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+table(month(feat_upper_catch_clean$date, label = TRUE))
+
+# feat_lower_catch has at.capture.run and final.run. According to the metadata the final.run "this is the field used in analysis". I'll get rid of at.capture.run and change final.run to run to match feat_upper_catch. also change n=count for both.
+
+feat_lower_catch_clean <- feat_lower_catch_clean %>%
+  rename(run = final.run,
+  count=n)%>%
+  select(-at.capture.run)
+
+feat_upper_catch_clean <- feat_upper_catch_clean %>%
+    rename(count=n)
+
+# the life.stage of upper and lower varies slightly
+feat_lower_catch_clean %>%
+  filter(common.name == "Chinook salmon") %>%
+  count(life.stage)
+
+feat_upper_catch_clean %>%
+  filter(common.name == "Chinook salmon") %>%
+  count(life.stage)
+
+#lower                            #upper 
+#not recorded                     #not recorded
+#Yolk sac fry (alevin)            #yolk sac fry (alevin)
+#Button-up fry                    #unbuttoned fry
+#fry                              #fry
+#parr                             #parr
+#silvery parr                     #silvery parr
+#smolt                            #pre-smolt
+#yearling                         #smolt
+#adult                            #juvenile
+                                  #YOY
+                                  #adult
+
+
+```
+
+
+# Tidying recapture data
+```{r}
+
+# separate date and time from "visitTime" for upper feather
+
+feat_upper_recapture <- feat_upper_recapture %>%
+  mutate(
+    date = as.Date(visitTime),
+    time = hms::as_hms(visitTime)
+  ) %>%
+    select(-visitTime)
+
+
+#  Same as previous excelsheet. I dont understand the difference bewteen "visitTime" and "visitTime2". I'll reach out for a SOP and some explanations. I also need an explanation for how they derive "trap_start_date" and "trap_end_date" from  "visitTime" and "visitTime2. 
+
+# separate date and time from "visitTime" only for now since it matches the the column in feat_upper. I'll change it to Date to match the other datasets.
+
+feat_lower_recapture <- feat_lower_recapture %>%
+  mutate(
+    date = as.Date(visitTime),
+    time = hms::as_hms(visitTime)
+  ) %>%
+    select(-visitTime, -visitTime2, -trap_start_date, -trap_end_date)
+
+#adding column for calendar year and water year
+feat_lower_recapture <- feat_lower_recapture %>%
+  mutate(
+    calendar.year = year(date),
+    water.year = if_else(month(date) >= 10,
+                         year(date) + 1,
+                         year(date))
+  )
+
+feat_upper_recapture <- feat_upper_recapture %>%
+  mutate(
+    calendar.year = year(date),
+    water.year = if_else(month(date) >= 10,
+                         year(date) + 1,
+                         year(date))
+  )
+
+
+# get rid of decimals
+feat_lower_recapture <- feat_lower_recapture %>%
+  mutate(across(c(ProjectDescriptionID,catchRawID, trapVisitID, releaseID,n,calendar.year, water.year ), as.integer))
+
+feat_upper_recapture <- feat_upper_recapture %>%
+  mutate(across(c(ProjectDescriptionID,catchRawID, trapVisitID, releaseID,forkLength,n,calendar.year, water.year ), as.integer))
+
+
+#updating column header names to be uniform (all lowercase, periods betweem words)
+
+feat_lower_recapture_clean <- feat_lower_recapture %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+table(month(feat_lower_recapture_clean$date, label = TRUE))
+
+feat_upper_recapture_clean <- feat_upper_recapture %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+table(month(feat_upper_recapture$date, label = TRUE))
+
+# feat_lower_recapture has at.capture.run and final.run. According to the metadata the final.run "this is the field used in analysis". I'll get rid of at.capture.run and change final.run to run to match feat_upper_recapture. also change n=count for both.
+
+feat_lower_recapture_clean <- feat_lower_recapture_clean %>%
+  rename(run = final.run,
+  count=n)%>%
+  select(-at.capture.run)
+
+feat_upper_recapture_clean <- feat_upper_recapture_clean %>%
+    rename(count=n)
+
+# the life.stage of upper and lower varies slightly
+
+
+#lower                            #upper 
+#not recorded                     #not recorded
+#Yolk sac fry (alevin)            #yolk sac fry (alevin)
+#Button-up fry                    #unbuttoned fry
+#fry                              #fry
+#parr                             #parr
+#silvery parr                     #silvery parr
+#smolt                            #pre-smolt
+#yearling                         #smolt
+#adult                            #juvenile
+                                  #YOY
+                                  #adult
+```
+
+# Tidying release data
+
+```{r}
+
+# separate date and time from "releaseTime" for upper feather and lower feather
+
+feat_upper_release <- feat_upper_release %>%
+  mutate(
+    release.date = as.Date(releaseTime),
+    release.time = hms::as_hms(releaseTime)
+  ) %>%
+    select(-releaseTime)
+
+feat_lower_release <- feat_lower_release %>%
+  mutate(
+    release.date = as.Date(releaseTime),
+    release.time = hms::as_hms(releaseTime)
+  ) %>%
+    select(-releaseTime)
+
+#adding column for calendar year and water year
+feat_lower_release <- feat_lower_release %>%
+  mutate(
+    calendar.year = year(release.date),
+    water.year = if_else(month(release.date) >= 10,
+                         year(release.date) + 1,
+                         year(release.date))
+  )
+
+feat_upper_release <- feat_upper_release %>%
+  mutate(
+    calendar.year = year(release.date),
+    water.year = if_else(month(release.date) >= 10,
+                         year(release.date) + 1,
+                         year(release.date))
+  )
+
+
+# get rid of decimals
+
+feat_lower_release <- feat_lower_release %>%
+  mutate(across(c(projectDescriptionID, releaseID,nReleased, testDays,calendar.year, water.year ), as.integer))
+
+feat_upper_release <- feat_upper_release %>%
+  mutate(across(c(projectDescriptionID, releaseID,nReleased, testDays,calendar.year, water.year ), as.integer))
+
+
+#updating column header names to be uniform (all lowercase, periods betweem words)
+
+feat_lower_release_clean <- feat_lower_release %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+table(month(feat_lower_release_clean$release.date, label = TRUE))
+
+feat_upper_release_clean <- feat_upper_release %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+table(month(feat_upper_release$release.date, label = TRUE))
+
+# feat_lower_release has include.analysis while feat_upper release its include.in.analysis. 
+
+feat_lower_release_clean <- feat_lower_release_clean %>%
+  rename(count.released=n.released)
+
+
+feat_upper_release_clean <- feat_upper_release_clean %>%
+    rename(count.released=n.released,
+    include.analysis=include.in.analysis)
+
+```
+
+# Tidying releasefish data
+
+```{r}
+
+# get rid of decimals
+
+feat_lower_releasefish_clean <- feat_lower_releasefish %>%
+  mutate(across(c(projectDescriptionID, releaseFishID, releaseID ), as.integer))
+
+feat_upper_releasefish_clean <- feat_upper_releasefish %>%
+  mutate(across(c(projectDescriptionID, releaseFishID, releaseID,forkLength ), as.integer))
+
+#updating column header names to be uniform (all lowercase, periods betweem words)
+
+feat_lower_releasefish_clean <- feat_lower_releasefish_clean %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+
+feat_upper_releasefish_clean <- feat_upper_releasefish_clean %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+```
+
+# Tidying trap data
+
+```{r}
+# separate date and time from "visitTime" for upper feather
+
+feat_upper_trap <- feat_upper_trap %>%
+  mutate(
+    date = as.Date(visitTime),
+    time = hms::as_hms(visitTime)
+  ) %>%
+    select(-visitTime)
+
+
+# So I dont understand the difference bewteen "visitTime" and "visitTime2". They are the same except for once. I'll reach out for a SOP and some explanations. I also need an explanation for how they derive "trap_start_date" and "trap_end_date" from  "visitTime" and "visitTime2. Sometimes they match sometimes they dont. 
+View(
+  feat_lower_trap %>%
+    filter(!(visitTime == visitTime2))
+)
+
+table(feat_lower_trap$visitTime == feat_lower_trap$visitTime2)
+
+ View(
+   feat_lower_trap %>%
+     filter(!(visitTime == trap_start_date))
+ )
+
+table(feat_lower_trap$visitTime == feat_lower_trap$trap_start_date)
+
+# separate date and time from "visitTime", "trap_start_date". and "trap_end_date". I'll change it to Date to match the other datasets.
+
+feat_lower_trap <- feat_lower_trap %>%
+  mutate(
+    date = as.Date(visitTime),
+    time = hms::as_hms(visitTime),
+    trap.start.date = as.Date(trap_start_date),
+    trap.start.time = hms::as_hms(trap_start_date),
+    trap.end.date = as.Date(trap_end_date),
+    trap.end.time = hms::as_hms(trap_end_date)
+  ) %>%
+    select(-visitTime, -visitTime2, -trap_start_date, -trap_end_date)
+
+
+
+#adding column for calendar year and water year
+feat_lower_trap <- feat_lower_trap %>%
+  mutate(
+    calendar.year = year(date),
+    water.year = if_else(month(date) >= 10,
+                         year(date) + 1,
+                         year(date))
+  )
+
+feat_upper_trap <- feat_upper_trap %>%
+  mutate(
+    calendar.year = year(date),
+    water.year = if_else(month(date) >= 10,
+                         year(date) + 1,
+                         year(date))
+  )
+
+
+# get rid of decimals
+feat_lower_trap <- feat_lower_trap %>%
+  mutate(across(c(projectDescriptionID, trapVisitID, counterAtStart,counterAtEnd,calendar.year, water.year ), as.integer))
+
+feat_upper_trap <- feat_upper_trap %>%
+  mutate(across(c(projectDescriptionID, trapVisitID, counterAtEnd,calendar.year, water.year ), as.integer))
+
+
+#updating column header names to be uniform (all lowercase, periods betweem words)
+
+feat_lower_trap_clean <- feat_lower_trap %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+table(month(feat_lower_trap_clean$date, label = TRUE))
+
+feat_upper_trap_clean <- feat_upper_trap %>% clean_names(case = "snake") %>%
+  rename_with(~ gsub("_", ".", .x))
+
+table(month(feat_upper_trap_clean$date, label = TRUE))
+
+```
+
+# Filter out chinook data
+
+```{r}
+# combined files too large to upload so filtering out Chinook catch data
+
+# Filter for only Chinook Salmon
+feat_lower_catch_clean <- feat_lower_catch_clean %>%
+  filter(common.name == "Chinook salmon")
+
+feat_upper_catch_clean <- feat_upper_catch_clean %>%
+  filter(common.name == "Chinook salmon")
+
+```
+
+# Export clean data
+
+```{r}
+# I cleaned all the excel files but I think we only need these
+write.csv(feat_lower_catch_clean, "data_processed/feat_lower_catch_tidy.csv", row.names = FALSE)
+write.csv(feat_lower_trap_clean, "data_processed/feat_lower_trap_tidy.csv", row.names = FALSE)
+write.csv(feat_upper_catch_clean, "data_processed/feat_upper_catch_tidy.csv", row.names = FALSE)
+write.csv(feat_upper_trap_clean, "data_processed/feat_upper_trap_tidy.csv", row.names = FALSE)
+```
+
+# Combine catch and trap
+
+```{r}
+feat_upper_combined <- feat_upper_trap_clean %>%
+  left_join(feat_upper_catch_clean, 
+            by = c("date", "trap.visit.id", "site.name"), 
+            suffix = c("", "_drop")) %>%
+  select(-ends_with("_drop"))
+
+feat_lower_combined <- feat_lower_trap_clean %>%
+  left_join(feat_lower_catch_clean, 
+            by = c("date", "trap.visit.id", "site.name"), 
+            suffix = c("", "_drop")) %>%
+  select(-ends_with("_drop"))
+  
+
+```
+
+# Export combined
+
+```{r}
+
+write.csv(feat_lower_combined, "data_processed/feat_lower_combined.csv", row.names = FALSE)
+write.csv(feat_upper_combined, "data_processed/feat_upper_combined.csv", row.names = FALSE)
+
+
+```
+
+# Exploratory 
+
+```{r}
+chinook_total_upper <- feat_upper_combined %>%
+  filter(common.name == "Chinook salmon") %>%
+  summarise(total_chinook = sum(count, na.rm = TRUE))
+
+feat_upper_combined %>%
+  filter(common.name == "Chinook salmon") %>%
+  ggplot(aes(x = fork.length)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "white") +
+ xlim(20, 150) +
+  labs(
+    title = "Fork Length Distribution of Chinook Salmon upper feather",
+    x = "Fork Length (mm)",
+    y = "Frequency"
+  ) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.title = element_text(size = 16),
+    axis.text  = element_text(size = 14)
+  )
+
+chinook_per_year <- feat_upper_combined %>%
+  filter(common.name == "Chinook salmon") %>%
+  group_by(water.year) %>%
+  summarise(total_chinook = sum(count, na.rm = TRUE))
+
+
+chinook_per_year %>%
+  ggplot(aes(x = water.year, y = total_chinook)) +
+  geom_col(fill = "darkgreen") +
+  theme_bw() +
+  labs(
+    title = "Chinook Salmon Count per Year upper feather",
+    x = "Year",
+    y = "Total Chinook"
+  ) +
+  scale_x_continuous(
+    breaks = chinook_per_year$water.year[seq(1, nrow(chinook_per_year), by = 2)]
+  ) +
+  theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.title = element_text(size = 16),
+    axis.text  = element_text(size = 14)
+  )
+
+  
+```
