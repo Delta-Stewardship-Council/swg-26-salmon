@@ -33,7 +33,7 @@ ggplot(fall_catch, aes(x = doy, y = factor(water.year))) +
 amer <- read_csv(here("data_processed", "amer_combined.csv")) %>%
   mutate(date = ymd(date))
 
-amer %>%
+fall_run_catch_by_month <- amer %>%
   filter(final.run == "Fall") %>%
   mutate(month = month(date, label = TRUE)) %>%
   group_by(month) %>%
@@ -44,8 +44,12 @@ amer %>%
   labs(x = NULL, y = "Total catch",
        title = "Total fall run catch by month, 2014–2025")
 
+ggsave(here("figures", "fall_run_catch_by_month.png"),
+       plot = fall_run_catch_by_month,
+       width = 8, height = 5, dpi = 300)
+
 # Fall run only, Average across years
-amer %>%
+average_amer <- amer %>%
   filter(final.run == "Fall") %>%
   mutate(doy = yday(date),
          week = floor(doy / 7) * 7) %>%
@@ -66,7 +70,9 @@ amer %>%
   labs(x = NULL, y = "Mean weekly catch (± SE)",
        title = "Average fall run catch timing")
 
-
+ggsave(here("figures", "average_amer.png"),
+       plot = average_amer,
+       width = 8, height = 5, dpi = 300)
 
 
 
@@ -86,6 +92,8 @@ ggplot(visit, aes(water.vel, catch)) +
 
 
 # Total catch per month per water year, then average across years
+library(here)
+
 fall_monthly <- amer %>%
   filter(final.run == "Fall") %>%
   mutate(month = month(date, label = TRUE)) %>%
@@ -98,13 +106,16 @@ fall_monthly <- amer %>%
     .groups = "drop"
   )
 
-ggplot(fall_monthly, aes(month, mean_catch)) +
+fall_monthly_avg_plot <- ggplot(fall_monthly, aes(month, mean_catch)) +
   geom_col(fill = "steelblue") +
   geom_errorbar(aes(ymin = pmax(mean_catch - se, 0), ymax = mean_catch + se),
                 width = 0.3) +
   labs(x = NULL, y = "Mean monthly catch (± SE)",
        title = "Average fall run catch by month")
 
+ggsave(here("figures", "fall_run_avg_catch_by_month.png"),
+       plot = fall_monthly_avg_plot,
+       width = 8, height = 5, dpi = 300)
 
 
 #discharge 
@@ -227,7 +238,8 @@ fall_timing <- amer %>%
     )
   )
 
-fall_timing %>%
+# fall_timing_table includes the gt() conversion
+fall_timing_table <- fall_timing %>%
   gt() %>%
   tab_header(
     title = "Fall-run juvenile Chinook timing",
@@ -239,14 +251,6 @@ fall_timing %>%
     pct_of_catch = "% of catch",
     timing = "Timing"
   ) %>%
-  fmt_number(columns = total_catch, decimals = 0, use_seps = TRUE) %>%
-  data_color(
-    columns = timing,
-    fn = scales::col_factor(
-      palette = c("High" = "#2c7fb8",
-                  "Medium" = "#7fcdbb",
-                  "Low" = "#edf8b1",
-                  "None" = "white"),
-      domain = c("High", "Medium", "Low", "None")
-    )
-  )
+  fmt_number(columns = total_catch, decimals = 0, use_seps = TRUE)
+
+gtsave(fall_timing_table, here("figures", "fall_run_timing.png"))
