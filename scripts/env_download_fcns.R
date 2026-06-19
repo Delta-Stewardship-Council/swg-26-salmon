@@ -151,4 +151,29 @@ test.temp <- ORF_wtemp_data %>%
 
 ORF_env <- full_join(test.flow, test.temp, by = join_by(datetime))
 
+test.flow <- GRL_flow_data %>% 
+  drop_na(datetime) %>% 
+  select(-parameter_cd)
+test.temp <- GRL_wtemp_data %>% 
+  drop_na(datetime) %>% 
+  select(datetime, wtemp.f, wtemp.c)
+
+GRL_env <- full_join(test.flow, test.temp, by = join_by(datetime))
+
+test.flow <- VON_flow_data %>% 
+  drop_na(datetime) %>% 
+  select(-parameter_cd)
+test.temp <- VON_wtemp_data %>% 
+  drop_na(datetime) %>% 
+  select(datetime, wtemp.f, wtemp.c)
+
+VON_env <- full_join(test.flow, test.temp, by = join_by(datetime))
+
+
+
+# Write files to data folder
 write_csv(ORF_env, "data_raw/feat_env_ORF.csv")
+write_csv(FSB_flow_data, "data_raw/feat_env_FSB.csv")
+write_csv(GRL_env, "data_raw/feat_env_GRL.csv")
+write_csv(VON_env, "data_raw/feat_env_VON.csv")
+
