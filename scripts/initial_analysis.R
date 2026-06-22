@@ -7,6 +7,7 @@ source("function_basic_survival_regression.R")
 # download and process telemetry data (takes a minute)
 fishdat = download_process_telemetry(trib = 'feather', season = 'spring')
 fishdat$fish_condition =  fishdat$fish_weight/fishdat$fish_length^3
+fishdat$release_location = factor(fishdat$release_location) #GAM requirement
 
 ### Fit GLM logistic model
 out = basic_survival_regression(data = fishdat,
