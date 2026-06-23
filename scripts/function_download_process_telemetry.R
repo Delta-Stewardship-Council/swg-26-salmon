@@ -5,6 +5,7 @@
 
 ## Outputs: a dataframe containing information about each fish released in the trib, and whether or not that fish survived ('survived.trib')
 
+require(rerddap); require(tidyr); require(dplyr)
 download_process_telemetry = function(trib, season = NULL){
   
   
@@ -79,7 +80,12 @@ download_process_telemetry = function(trib, season = NULL){
   detect_max$survived.trib = ifelse(detect_max$receiver_region %in% trib_receiver_regions, 0, 1)
   fish_studied = left_join(fish_studied, detect_max[, c("fish_id", 'survived.trib')], by = 'fish_id')
   
-  return(fish_studied)
+  ## do additional filtering
+  
+  ## rearrange columns for convenience
+  fish_studied_final = fish_studied %>% select(fish_id, study_id, survived.trib, fish_release_date, release_location, release_latitude, release_longitude, fish_length, fish_weight, everything())
+  
+  return(fish_studied_final)
   
   
 }
