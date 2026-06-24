@@ -2,11 +2,21 @@
 ## In its current form, this function downloads the relevant acoustic telemetry data (for the indicated tributary/season)
 ## and then identifies which fish 'survived' the trib (for simplicity, were last detected outside the trib)
 ## We can change this function later to do more complex processing for a more detailed survival model
+## Inputs:
+##      * trib: name of tributary (current options: 'feather', 'american')
+##      * season: in cases where we have data for multiple runs, specify the season (currently, 'fall' or 'spring')
+##      * save_dir: directory where outputs should be saved (created if it doesn't exist). 
+##      * waterfall_plots: T or F, create and save waterfall plots for the movement paths of each fish (for processing purposes, to spot potential false detections)
 
 ## Outputs: a dataframe containing information about each fish released in the trib, and whether or not that fish survived ('survived.trib')
 
-require(rerddap); require(tidyr); require(dplyr)
-download_process_telemetry = function(trib, season = NULL){
+require(rerddap); require(tidyr); require(dplyr); library(ggplot2); library(this.path)
+setwd(this.path::here()); setwd('..')
+
+download_process_telemetry = function(trib, season = NULL, save_dir = "data_processed", waterfall_plots = F){
+  
+  ## Set up folder to save (if it doesn't exist)
+  if(!dir.exists(save_dir)){ dir.create(save_dir) }
   
   
   #### IDENTIFY RELEVANT STUDIES ####
@@ -61,7 +71,12 @@ download_process_telemetry = function(trib, season = NULL){
   
   ## Associate detection data to tagging and receiver data 
   dat_fish <- merge(dat, fish, by = c("study_id", "fish_id"))
-  dat_fish_recv <- merge(dat_fish, recvs, by = "dep_id")
+  dat_fish_recv <- merge(dat_fish,
+                         subset(recvs, select = -c(receiver_serial_number, receiver_river_km, receiver_general_river_km, receiver_location, receiver_general_location)),
+                         by = "dep_id")
+  
+  ## Reorder data by fish and time
+  dat_fish_recv = dat_fish_recv[order(dat_fish_recv$fish_id, dat_fish_recv$first_time), ]
   
   ## remove big objects from workspace
   rm(dat); rm(dat_fish)
@@ -84,6 +99,31 @@ download_process_telemetry = function(trib, season = NULL){
   
   ## rearrange columns for convenience
   fish_studied_final = fish_studied %>% select(fish_id, study_id, survived.trib, fish_release_date, release_location, release_latitude, release_longitude, fish_length, fish_weight, everything())
+  
+  
+  ### PLOTTING ###
+  
+  if(waterfall_plots == T){
+    for(study_i in unique(fish_studied$study_id)){
+      fish_study_i = subset(fish_studied, study_id == study_i)
+      detects_study_i = subset(dat_fish_recv, study_id == study_i)
+      detects_study_i <- detects_study_i %>%
+        arrange(fish_id, first_time) %>% 
+        group_by(fish_id) %>%
+        mutate(receiver_general_river_km_lag1 = dplyr::lag(receiver_general_river_km, n = 1),
+               first_time_lag1 = dplyr::lag(first_time, n = 1)) %>%
+        ungroup()
+      detects_study_i$upstream = ifelse(detects_study_i$receiver_general_river_km > detects_study_i$receiver_general_river_km_lag1, 1, 0)
+      plot_i = ggplot(detects_study_i) + 
+               geom_step(aes(x = first_time, y = receiver_general_river_km, group = fish_id), alpha = .5) +
+               theme_classic() + 
+               labs(x = "Date", y = "Receiver Location (river km)", title = paste0("Fish Detections (", study_i, ")")) 
+      ggsave(plot = plot_i, filename = paste0(save_dir, "/waterfall_plots_", study_i, ".png"), width = 6, height = 6)         
+    }
+  }
+  
+  
+  
   
   return(fish_studied_final)
   
