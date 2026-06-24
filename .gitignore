@@ -51,3 +51,6 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# rosm.cache folder
+rosm.cache/
