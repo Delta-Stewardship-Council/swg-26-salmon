@@ -1,0 +1,22 @@
+trib,fr.stars.reach,sr.stars.reach,name,station.id,agency,usgs.sta.num,type,lat,lon
+American,American,,American River at Fair Oaks,AFO,USGS,11446500,Env data,38.63546,-121.22773
+American,American,,American RIver at William B Pond Park,AWP,USGS,11446700,Env data,38.591,-121.332
+American,American,,American River Below Watt Ave Bridge,AWB,USGS,11446980,Env data,38.567,-121.387
+American,American,,American River at H Street Bridge,HST,DWR,,Env data,38.56871,-121.42369
+Feather,Oroville,,Oroville Fish Hatchery (Feather River),ORF,DWR,,Env data,39.517,-121.55
+Feather,Oroville,,Feather River at Mile 61.6,FRA,DWR,,Env data,39.468,-121.597
+Feather,Oroville,,Feather River below Thermolito Afterbay,FTA,DWR,,Env data,39.45292,-121.63954
+Feather,Oroville,,Feather River OWA South Boundary Near Gridley,FOW,DWR,,Env data,39.4025,-121.6194
+Feather,Gridley,,Feather River near Gridley,GRL,DWR,,Env data,39.36658,-121.64737
+Feather,Gridley,,Feather River at Live Oak,FLO,Sutter County,,Env data,39.248,-121.636
+Feather,Gridley,,Feather River at Yuba Water Treatment Plant,YWP,DWR,,Env data,39.16165,-121.61242
+Feather,Gridley,,Feather River at Yuba City,YUB,DWR,,Env data,39.13857,-121.60629
+Feather,Boyds,,Feather River at Boyd's Landing Above Star Bend,FSB,DWR,,Env data,39.0455,-121.61044
+Feather,Boyds,,Feather River near Nicolaus,NIC,DWR,,Env data,38.88984,-121.60476
+Sacramento,Boyds,,Sacramento River at Verona,VON,DWR,,Env data,38.77415,-121.59807
+American,Lower- RM9,,American River at Watt Ave,,CDFW,,RST,38.566909,-121.385043
+Feather,Upper-RM61,,Feather River Eye Riffle,,DWR,,RST,39.456267,-121.615
+Feather,Upper-RM45,,Feather River Herringer Riffle,,DWR,,RST,39.315783,-121.62477
+Feather,Lower-RM17,,Feather River Star Bend,,CDFW,,RST,39.00506,-121.57924
+Stanislaus,RM8.6,,Stanislaus River at Caswell State Park,,Pac States,,RST,37.701969,-121.178878
+Stanislaus,RM8.40.1,,Stanislaus River near Oakdale,,FishBio,,RST,37.770972,-120.867708

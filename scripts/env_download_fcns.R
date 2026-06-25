@@ -1,21 +1,55 @@
 library(CDECRetrieve)
 library(tidyverse)
+library(tidyr)
 library(lubridate)
 library(dplyr)
 library(purrr)
+library(here)
 
-# This is a function to dowload multiple CDEC stations at once as save as dataframes, using
-# the 
+# This is a function to dowload multiple CDEC stations at once and save as dataframes, using
+# the cdecquery function 
+
+# Also uses a matching function to simultaneously add lat/lon for stations to data
 
 #########################################################################
 # Function to downlaod multiple FLOW stations from CDEC
+# A few caveats: 
+#1. All stations must have the same sensor code AND event duration
 download_cdec_flow <- function(sta_list,
   start_date,
   end_date,
   sensor_num = 20,
   dur_code = "E",
+  coords_file = here("data_raw", "env_map_coords.csv"), # path to coord csv with location_id, lat, lon
   assign_global = TRUE) {
 
+# Load and validate coordinates lookup
+if (!is.null(coords_file)) {
+coords <- read.csv(coords_file, stringsAsFactors = FALSE)
+
+# Flexible column detection: tolerate varied capitalisation / naming
+names(coords) <- tolower(trimws(names(coords)))
+
+# Expect columns: location_id (or station_id / station), latitude (or lat), longitude (or lon / long)
+id_col  <- grep("^(location_id|station.id|station)$", names(coords), value = TRUE)[1]
+lat_col <- grep("^(latitude|lat)$",                   names(coords), value = TRUE)[1]
+lon_col <- grep("^(longitude|lon|long)$",             names(coords), value = TRUE)[1]
+
+if (any(is.na(c(id_col, lat_col, lon_col)))) {
+warning("coords_file must contain columns for station ID, latitude, and longitude. ",
+"Recognised names: location_id/station.id/station, latitude/lat, longitude/lon/long. ",
+"Coordinates will NOT be joined.")
+coords <- NULL
+} else {
+coords <- coords[, c(id_col, lat_col, lon_col)]
+names(coords) <- c("location_id", "latitude", "longitude")
+coords$location_id <- toupper(trimws(coords$location_id))
+}
+} else {
+coords <- NULL
+}
+
+# download loop
 results <- map(
 sta_list,
 function(sta) {
@@ -36,19 +70,127 @@ if (nrow(dat) == 0) {
 warning(paste("No data returned for", sta))
 }
 
+dat <- dat %>%
+  rename(flow.cfs = parameter_value)
+
+# --- Join coordinates -------------------------------------------------
+if (!is.null(coords)) {
+dat <- dat %>%
+mutate(location_id = toupper(trimws(location_id))) %>%
+left_join(coords, by = "location_id")
+
+if (all(is.na(dat$latitude))) {
+warning(paste("No coordinate match found for station", sta,
+"— check that the location_id in your CSV matches CDEC station codes."))
+}
+}
+
 dat
 
 }, error = function(e) {
-
 warning(paste("Failed for", sta, ":", e$message))
 NULL
 })
 }
 )
 
-names(results) <- paste0(sta_list, "_data")
+names(results) <- paste0(sta_list, "_flow_data")
 
-# Create separate objects in global environment
+if (assign_global) {
+list2env(results, envir = .GlobalEnv)
+}
+
+return(results)
+}
+####################################################################
+
+#########################################################################
+# Function to downlaod multiple TEMP stations from CDEC
+# A few caveats: 
+#1. All stations must have the same sensor code AND event duration
+
+download_cdec_wtemp <- function(sta_list,
+  start_date,
+  end_date,
+  sensor_num  = 25,       # wtemp in °F
+  dur_code    = "E",
+  coords_file = here("data_raw", "env_map_coords.csv"), # path to coord csv with location_id, lat, lon
+  assign_global = TRUE) {
+
+# Load and validate coordinates lookup
+if (!is.null(coords_file)) {
+coords <- read.csv(coords_file, stringsAsFactors = FALSE)
+
+# Flexible column detection: tolerate varied capitalisation / naming
+names(coords) <- tolower(trimws(names(coords)))
+
+# Expect columns: location_id (or station_id / station), latitude (or lat), longitude (or lon / long)
+id_col  <- grep("^(location_id|station.id|station)$", names(coords), value = TRUE)[1]
+lat_col <- grep("^(latitude|lat)$",                   names(coords), value = TRUE)[1]
+lon_col <- grep("^(longitude|lon|long)$",             names(coords), value = TRUE)[1]
+
+if (any(is.na(c(id_col, lat_col, lon_col)))) {
+warning("coords_file must contain columns for station ID, latitude, and longitude. ",
+"Recognised names: location_id/station.id/station, latitude/lat, longitude/lon/long. ",
+"Coordinates will NOT be joined.")
+coords <- NULL
+} else {
+coords <- coords[, c(id_col, lat_col, lon_col)]
+names(coords) <- c("location_id", "latitude", "longitude")
+coords$location_id <- toupper(trimws(coords$location_id))
+}
+} else {
+coords <- NULL
+}
+
+# download loop
+results <- map(
+sta_list,
+function(sta) {
+
+message(paste("Downloading", sta))
+
+tryCatch({
+
+dat <- cdec_query(
+station    = sta,
+sensor_num = sensor_num,
+dur_code   = dur_code,
+start_date = start_date,
+end_date   = end_date
+)
+
+if (nrow(dat) == 0) {
+warning(paste("No data returned for", sta))
+}
+
+dat <- dat %>%
+rename(wtemp.f = parameter_value) %>%
+mutate(wtemp.c = (wtemp.f - 32) * (5 / 9))
+
+# --- Join coordinates -------------------------------------------------
+if (!is.null(coords)) {
+dat <- dat %>%
+mutate(location_id = toupper(trimws(location_id))) %>%
+left_join(coords, by = "location_id")
+
+if (all(is.na(dat$latitude))) {
+warning(paste("No coordinate match found for station", sta,
+"— check that the location_id in your CSV matches CDEC station codes."))
+}
+}
+
+dat
+
+}, error = function(e) {
+warning(paste("Failed for", sta, ":", e$message))
+NULL
+})
+}
+)
+
+names(results) <- paste0(sta_list, "_wtemp_data")
+
 if (assign_global) {
 list2env(results, envir = .GlobalEnv)
 }
@@ -67,10 +209,60 @@ end.date.f <- "2025-06-30"
 
 # set vector of stations
 stations.flow.f <- c("ORF", "GRL", "FSB", "VON")
+stations.wtemp.f <- c("ORF", "FRA", "FTA", "FOW", "GRL", "VON")
+sta.flow.f <- c("GRL")
+sta.temp.f <- c("FOW")
 
-# use the fcn
+# use the fcn for flow data
 flow_feather <- download_cdec_flow(
-  sta_list= stations.flow.f,
+  sta_list= sta.flow.f, #stations.flow.f,
   start_date = start.date.f,
   end_date = end.date.f
 )
+
+# use the fcn for temp data
+wtemp_feather <- download_cdec_wtemp(
+  sta_list= sta.temp.f, #stations.wtemp.f,
+  start_date = start.date.f,
+  end_date = end.date.f
+)
+
+test.flow <- ORF_flow_data %>% 
+  drop_na(datetime) %>% 
+  select(-parameter_cd)
+test.temp <- ORF_wtemp_data %>% 
+  drop_na(datetime) %>% 
+  select(datetime, wtemp.f, wtemp.c)
+
+ORF_env <- full_join(test.flow, test.temp, by = join_by(datetime))
+
+test.flow <- GRL_flow_data %>% 
+  drop_na(datetime) %>% 
+  select(-parameter_cd)
+test.temp <- GRL_wtemp_data %>% 
+  drop_na(datetime) %>% 
+  select(datetime, wtemp.f, wtemp.c)
+
+GRL_env <- full_join(test.flow, test.temp, by = join_by(datetime))
+
+test.flow <- VON_flow_data %>% 
+  drop_na(datetime) %>% 
+  select(-parameter_cd)
+test.temp <- VON_wtemp_data %>% 
+  drop_na(datetime) %>% 
+  select(datetime, wtemp.f, wtemp.c)
+
+VON_env <- full_join(test.flow, test.temp, by = join_by(datetime))
+
+
+
+# Write files to data folder
+write_csv(ORF_env, "data_raw/feat_env_ORF.csv")
+write_csv(GRL_env, "data_raw/feat_env_GRL.csv")
+write_csv(VON_env, "data_raw/feat_env_VON.csv")
+
+write_csv(FOW_wtemp_data, "data_raw/feat_env_FOW_wtemp.csv")
+write_csv(FRA_wtemp_data, "data_raw/feat_env_FRA_wtemp.csv")
+write_csv(FTA_wtemp_data, "data_raw/feat_env_FTA_wtemp.csv")
+write_csv(FSB_flow_data, "data_raw/feat_env_FSB_flow.csv")
+
