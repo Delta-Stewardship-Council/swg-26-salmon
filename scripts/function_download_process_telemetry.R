@@ -25,7 +25,8 @@ download_process_telemetry = function(trib, season = NULL){
       stop('specify season for feather river')
     }
   }else if(trib == 'american'){
-    ## Anna--haven't double checked these yet
+    ## Anna--haven't double checked these yet 
+    ## Jessie can confirm these are correct - based on the study ids that fall within the coordinates of the Am river
     studyids = c("Nimbus_Fall_2016", "Nimbus_Fall_2017", "Nimbus_Fall_2018", "Nimbus_Fall_2022",
                        "Nimbus_Fall_2023", "Nimbus_Fall_2024", "Nimbus_Fall_2025")
     trib_receiver_regions = c("Amer R")
@@ -83,3 +84,4 @@ download_process_telemetry = function(trib, season = NULL){
   
   
 }
+
