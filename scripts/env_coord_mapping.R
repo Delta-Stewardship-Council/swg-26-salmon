@@ -50,32 +50,7 @@ sta_3857_sf <- st_transform(sta_to_sf,
 #sta_wq_sf <- st_as_sf(sta[sta$WQ.type != "" ,], coords= c("Lon", "Lat"), crs = 4326)
 
 
-sta_flow_xy <- cbind(
-  sta_flow_sf,
-  st_coordinates(sta_flow_sf)
-)
-
-sta_wq_xy <- cbind(
-  sta_wq_sf,
-  st_coordinates(sta_wq_sf)
-)
-
-sta_sed_xy <- cbind(
-  sta_sed_sf,
-  st_coordinates(sta_sed_sf)
-)
-
-
-#This gets you zoomed in delta - FLOW sta
-ggplot(Deltaz)+
-  geom_sf()+
-  geom_sf(data= sta_flow_sf, aes(color= Flow.type), size= 2)+
-  geom_label_repel(data= sta_flow_xy, aes(x= X, y= Y, label=Sta.id), box.padding = 0.3, point.padding = 0.4,
-                   min.segment.length =0, size= 2, fontface= "bold")+
-  xlab("Longitude")+
-  ylab("Latitude")+
-  scale_color_discrete(name ="Flow Data Type")+
-  theme_bw()
+#This gets you Delta, but doesn't show the feather
 
 ggplot(WW_Watershed) +
   geom_sf(aes())+
@@ -83,34 +58,8 @@ ggplot(WW_Watershed) +
     mapping = aes(fill = type)) +
     geom_sf(data = rivers_3338_sf,
             aes(linewidth = StrOrder),
-            color = 'blue', alpha = .5) +
-    scale_linewidth(range = c(0.05, 0.5),
-                    guide = "none") +
-    geom_sf(data = pop_3338_sf, size = 0.5, color = 'grey20') +
-    labs(title = "Total Population by Alaska Region",
-         fill = "Total Population") +
-    scale_fill_continuous(low = "khaki",
-                          high =  "firebrick") +
-    theme_bw()
+            color = 'blue', alpha = .5)
 
-
-  ggplot(data = sta_to_sf) +
-    ggspatial::annotation_map_tile(type = "osm", zoom = 6, progress = 'none') + 
-    # higher zoom values are more detailed 
-    #geom_sf(aes(color = population),
-    #        fill = NA) +
-    coord_sf(xlim = c(-16900000, -16300000), ylim = c(8400000, 9000000))
-
-ggplot() +
-  ggspatial::annotation_map_tile(type = "cartolight", zoom = 16, progress = 'none')+
-  geom_sf(data= sta_to_3857, aes(color = type)) +
-  coord_sf(xlim = c(-13500000, -13600000), ylim = c(4500000, 4800000))
-
-ggplot(data = sta_to_sf) +
-  geom_sf()
-
-ak_bbox <- st_bbox(pop_4326_sf) %>%
-    as.numeric()
 
 ggplot() + #works
   ggspatial::annotation_map_tile(type = "cartolight", zoom = 10)+
