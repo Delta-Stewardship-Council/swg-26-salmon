@@ -11,10 +11,15 @@
 ##                 for min_count), the line between i and j is not plotted.
 ## Outputs: ggplot of river network
 
-library(reshape2); library(igraph); library(ggplot2); library(ggrepel)
-#study_i = "FR_Spring_2013"; filter_perc = 5; min_count = 2; min_rec_dist = 1
+library(reshape2); library(igraph); library(ggplot2); library(ggrepel); library(this.path)
+setwd(this.path::here()); setwd('..')
+#study_i = NULL; filter_perc = 20; min_count = 2; min_rec_dist = 1; save_dir = 'figures'
 
-plot_river_network = function(data, study_i = NULL, filter_perc = 5, min_count = 2, min_rec_dist = 1){
+plot_river_network = function(data, study_i = NULL, filter_perc = 10, min_count = 2, min_rec_dist = 1,
+                              save_dir = 'figures'){
+  
+  ## Set up folder to save (if it doesn't exist)
+  if(!dir.exists(save_dir)){ dir.create(save_dir) }
   
   if(!is.null(study_i)){
     data = subset(data, study_id == study_i)
@@ -62,11 +67,19 @@ plot_river_network = function(data, study_i = NULL, filter_perc = 5, min_count =
   recv_info$values = NULL
   recv_info$rec_bin = cut(recv_info$receiver_general_latitude, breaks = seq(min(recv_info$receiver_general_latitude)-.1, max(recv_info$receiver_general_latitude)+.1, by = .1))
 
+ 
   ## merge back in with full dataset
   data = merge(data, recv_info[,c("receiver_general_location", "rec_group")], by = "receiver_general_location", sort = F)
 
   ## again double check data is sorted by date and fish
   data = data[order(data$fish_id, data$first_time), ]
+  
+  ## identify receiver groups present in most studies; remove those that aren't
+  recv_studies = data %>% group_by(rec_group)  %>% 
+                 summarise(unique_studies = n_distinct(study_id))
+  recv_studies = subset(recv_studies, unique_studies >= length(unique(data$study_id)) - 2)
+  data = subset(data, rec_group %in% unique(recv_studies$rec_group))
+  recv_info = subset(recv_info, rec_group %in% unique(recv_studies$rec_group))
   
   ## find general location of next receiver in time series
   data = data %>% group_by(fish_id) %>%
@@ -90,9 +103,10 @@ plot_river_network = function(data, study_i = NULL, filter_perc = 5, min_count =
   recv_bins = recv_info_sub[!duplicated(recv_info_sub$rec_group), ]
   recv_bins = recv_bins %>% group_by(rec_bin) %>%
     mutate(plot_x = consecutive_id(receiver_general_longitude),
-           plot_x_sc = scale(plot_x, scale = F)) %>%
+           plot_x_sc = scale(plot_x, scale = F),
+           plot_y = consecutive_id(rec_group)) %>%
     ungroup()
-  recv_info_sub = merge(recv_info_sub, recv_bins[, c("rec_group", "plot_x", "plot_x_sc")], by = 'rec_group')
+  recv_info_sub = merge(recv_info_sub, recv_bins[, c("rec_group", "plot_x", "plot_x_sc", "plot_y")], by = 'rec_group')
   
   
   # merge with receiver info
@@ -120,15 +134,21 @@ plot_river_network = function(data, study_i = NULL, filter_perc = 5, min_count =
     coord_fixed() + theme_classic() 
   
   ## simplified network map
-  ggplot(data_recv_sub) + 
+  network_plot = ggplot(data_recv_sub) + 
+    geom_text_repel(data = recv_important, aes(y = rec_group, x = plot_x_sc, label = receiver_general_location),
+                    nudge_x = ifelse(recv_important$plot_x_sc>0 | (recv_important$plot_x_sc==0 & recv_important$rec_group%%2!=0), 2, -2), color = 'red')+
     geom_segment(aes(y = rec_group, x = plot_x_sc.i,
                      yend = next_rec_group, xend = plot_x_sc.j,
                      linewidth = perc_next),
                  arrow = arrow(length = unit(0.2,"cm")))+
-    scale_linewidth_continuous(range = c(0.01, 1), breaks = c(0, 10, 50, 100))+
+    scale_linewidth_binned(range = c(0.01, 1), n.breaks = 8)+
     #geom_point(data = release_info, aes(x = release_longitude, y = release_river_km, color = release_location))+
-    geom_text_repel(data = recv_important, aes(y = rec_group, x = plot_x_sc, label = receiver_general_location),
-                    nudge_x = ifelse(recv_important$plot_x_sc>0, 2, -2), color = 'red')+
-    theme_classic() + labs(x = NULL, y = NULL, linewidth = "% of fish")
+    theme_classic() + theme(axis.text = element_blank(), legend.position = 'none')+
+    labs(x = NULL, y = NULL, linewidth = "% of fish")
 
+  save_plot_name = paste0(save_dir, "/network_plots_", gsub(" ", "", unique(data$fish_type)), "_",
+                          "filter", filter_perc, "_", format(Sys.time(), "%h%d_%H%M%S"), ".png")
+  ggsave(plot = network_plot, filename = save_plot_name, width = 8, height = 6) 
+  
+  return(network_plot)
 } 

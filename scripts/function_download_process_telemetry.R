@@ -6,6 +6,7 @@
 ##      * trib: name of tributary (current options: 'feather', 'american')
 ##      * season: in cases where we have data for multiple runs, specify the season (currently, 'fall' or 'spring')
 ##      * save_dir: directory where outputs should be saved (created if it doesn't exist). 
+##      * return_type: 'fishdat' only returns data summary for each fish, "all" returns full detection history
 ##      * waterfall_plots: T or F, create and save waterfall plots for the movement paths of each fish (for processing purposes, to spot potential false detections)
 
 ## Outputs: a dataframe containing information about each fish released in the trib, and whether or not that fish survived ('survived.trib')
@@ -14,7 +15,8 @@ require(rerddap); require(tidyr); require(dplyr); library(ggplot2); library(this
 setwd(this.path::here()); setwd('..')
 #trib = 'feather'; season = 'spring'; save_dir = 'data_processed'; waterfall_plots = F
 
-download_process_telemetry = function(trib, season = NULL, save_dir = "data_processed", waterfall_plots = F){
+download_process_telemetry = function(trib, season = NULL, save_dir = "data_processed", 
+                                      return_type = "fishdat", waterfall_plots = F){
   
   ## Set up folder to save (if it doesn't exist)
   if(!dir.exists(save_dir)){ dir.create(save_dir) }
@@ -126,8 +128,12 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
   
   
   
-  
-  return(fish_studied_final)
+  if(return_type == 'fishdat'){
+    return(fish_studied_final)
+  }else if(return_type == 'all'){
+    return(list(dat_fish_recv = dat_fish_recv, fishdat = fish_studied_final))
+  }
+
   
   
 }
