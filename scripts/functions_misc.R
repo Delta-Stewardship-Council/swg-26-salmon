@@ -11,7 +11,7 @@
 ##                 for min_count), the line between i and j is not plotted.
 ## Outputs: ggplot of river network
 
-library(reshape2); library(igraph); library(ggplot2); library(ggrepel); library(this.path)
+library(reshape2); library(igraph); library(ggplot2); library(ggrepel); library(this.path); library(geosphere)
 setwd(this.path::here()); setwd('..')
 #study_i = NULL; filter_perc = 20; min_count = 2; min_rec_dist = 1; save_dir = 'figures'
 
@@ -52,9 +52,10 @@ plot_river_network = function(data, study_i = NULL, filter_perc = 10, min_count 
   #                                    .default = recv_info$receiver_general_location)
   
   ## group receivers together that are really close
-  ## *** need to update to calculate distance based on lat/long, not river km ***
-  recv.dist =dist(recv_info[, "receiver_general_river_km"])
+  #recv.dist =dist(recv_info[, "receiver_general_river_km"])
+  recv.dist =distm(recv_info[, c("receiver_general_longitude", "receiver_general_latitude")], fun = distHaversine)
   recv.dist=as.matrix(recv.dist, labels=TRUE)
+  recv.dist = recv.dist/1000 # m to km
   colnames(recv.dist) <- rownames(recv.dist) <- recv_info$receiver_general_location 
   recv.dist[recv.dist < min_rec_dist] = 0
   recv.dist[recv.dist >= min_rec_dist] = 1
