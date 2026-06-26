@@ -52,6 +52,7 @@ plot_river_network = function(data, study_i = NULL, filter_perc = 10, min_count 
   #                                    .default = recv_info$receiver_general_location)
   
   ## group receivers together that are really close
+  ## *** need to update to calculate distance based on lat/long, not river km ***
   recv.dist =dist(recv_info[, "receiver_general_river_km"])
   recv.dist=as.matrix(recv.dist, labels=TRUE)
   colnames(recv.dist) <- rownames(recv.dist) <- recv_info$receiver_general_location 
