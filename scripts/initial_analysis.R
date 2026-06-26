@@ -5,8 +5,8 @@ source("scripts/function_download_process_telemetry.R")
 source("scripts/function_basic_survival_regression.R")
 source("scripts/functions_misc.R")
 
-my_trib = 'feather'
-my_season = 'spring'
+my_trib = 'american'
+my_season = 'fall'
 
 # download and process telemetry data (takes a minute)
 alldat = download_process_telemetry(trib = my_trib, season = my_season, return_type = 'all')
