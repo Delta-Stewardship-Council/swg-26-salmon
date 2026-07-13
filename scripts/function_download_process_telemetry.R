@@ -8,7 +8,7 @@
 ##      * save_dir: directory where outputs should be saved (created if it doesn't exist). 
 ##      * return_type: 'fishdat' only returns data summary for each fish, "all" returns full detection history
 ##      * censor_upstream: censor fish that move upstream more than X km; default = 5. (Set to a large number, e.g. 1000, to turn off censoring)
-##      * speed_limit: filter observations where the fish appears to move at a speed greater than X km/day
+##      * speed_limit: filter observations where the fish appears to move at a speed greater than X km/day (note: very short bursts of speed are allowed, see below)
 ##      * waterfall_plots: T or F, create and save waterfall plots for the movement paths of each fish (for processing purposes, to spot potential false detections)
 
 ## Outputs: a dataframe containing information about each fish released in the trib, and whether or not that fish survived ('survived.trib')
@@ -81,6 +81,8 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
                          subset(recvs, select = -c(receiver_serial_number, receiver_river_km, receiver_general_river_km, receiver_location, receiver_general_location)),
                          by = "dep_id")
   
+  print('done downloading and merging data')
+  
   ## Reorder data by fish and time
   dat_fish_recv = dat_fish_recv[order(dat_fish_recv$fish_id, dat_fish_recv$first_time), ]
   
@@ -90,6 +92,20 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
   ## Fish in studies of interest
   fish_studied = subset(fish, study_id %in% studyids)
   
+  ## Receiver summary
+  recvs_studied = recvs %>% filter(dep_id %in% unique(dat_fish_recv$dep_id)) %>% 
+                            group_by(receiver_general_location) %>%
+                            arrange(receiver_general_river_km, receiver_location) %>%
+                            select(dep_id, receiver_general_location, receiver_location, receiver_region,
+                                   receiver_general_river_km, receiver_river_km, 
+                                   receiver_general_latitude, receiver_general_longitude,
+                                   latitude, longitude, receiver_start, receiver_end) %>%
+                           ungroup()
+  
+  recvs_location_summary = recvs_studied %>% filter(!duplicated(receiver_location)) %>%
+                                             select(-dep_id, -receiver_start, -receiver_end)
+  recvs_general_location_summary = recvs_location_summary %>% filter(!duplicated(receiver_general_location)) %>%
+                                         select(-receiver_river_km, -latitude, -longitude, -receiver_location)
   
   ### FILTERING ###
   
@@ -148,7 +164,7 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
         summarize(filter_count = n(), row_filter = min(row_i))
       
       filter_speeds_rows = rbind(filter_speeds_rows, filter_speeds_rows_new)
-      print(nrow(filter_speeds_rows_new))
+      #print(nrow(filter_speeds_rows_new)) #fish remaining counter
       
     }else{
       done_filtering = T
@@ -156,15 +172,39 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
     
   }
   
-  
   #remove all flagged rows from dat_fish_recv
   dat_fish_recv = dat_fish_recv %>% filter(!(row_i %in% unique(filter_speeds_rows$row_filter) ))
-  
-  
-  ## Censor fish that swim upstream (more than 5 km)
 
   
   
+  ## Censor fish that swim upstream (more than X km)
+  dat_fish_recv = dat_fish_recv %>%
+    arrange(fish_id, first_time) %>% 
+    group_by(fish_id) %>%
+    mutate(receiver_general_river_km_next1 = dplyr::lead(receiver_general_river_km, n = 1),
+           receiver_general_location_next1 = dplyr::lead(receiver_general_location, n = 1),
+           receiver_location_next1 = dplyr::lead(receiver_location, n = 1),
+           too_far_upstream = receiver_general_river_km_next1 - receiver_general_river_km > censor_upstream) %>%
+    ungroup()
+  
+  #view censored fish/locations
+  upstream_censored_fish = subset(dat_fish_recv, too_far_upstream == T)[, c("fish_id", 'first_time', 'receiver_general_location', 'receiver_general_location_next1',
+                                                  'receiver_general_river_km','receiver_general_river_km_next1',
+                                                  "receiver_location", "receiver_location_next1", "too_far_upstream")]
+  
+  #censor fish when they swim upstream
+  dat_fish_recv =  dat_fish_recv %>% 
+                   arrange(fish_id, first_time) %>% 
+                   group_by(fish_id) %>%
+                   mutate(too_far_upstream_lag1 = dplyr::lag(too_far_upstream, n = 1)) %>%
+                   filter(cumsum(replace_na(too_far_upstream_lag1, F)) < 1) %>%
+                   ungroup()
+  
+  ## remove extra columns
+  dat_fish_recv = dat_fish_recv[, colnames_copy]
+  
+  
+  print('done filtering data')
   
   
   ### FIND WHAT FISH SURVIVED THE TRIB ##
@@ -210,7 +250,8 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
   if(return_type == 'fishdat'){
     return(fish_studied_final)
   }else if(return_type == 'all'){
-    return(list(dat_fish_recv = dat_fish_recv, fishdat = fish_studied_final))
+    return(list(dat_fish_recv = dat_fish_recv, fishdat = fish_studied_final, recvdat = recvs_studied,
+                recvs_location_summary = recvs_location_summary, recvs_general_summary = recvs_general_location_summary))
   }
 
   
