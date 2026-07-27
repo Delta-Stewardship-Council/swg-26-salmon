@@ -13,6 +13,7 @@
 
 require(rerddap); require(tidyr); require(dplyr); library(ggplot2); library(this.path)
 setwd(this.path::here()); setwd('..')
+#setwd(dirname(this.path::here()))
 #trib = 'feather'; season = 'spring'; save_dir = 'data_processed'; waterfall_plots = F
 
 download_process_telemetry = function(trib, season = NULL, save_dir = "data_processed", 
