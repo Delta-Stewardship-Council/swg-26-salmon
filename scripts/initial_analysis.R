@@ -5,13 +5,21 @@ source("scripts/function_download_process_telemetry.R")
 source("scripts/function_basic_survival_regression.R")
 source("scripts/functions_misc.R")
 
-my_trib = 'american'
-my_season = 'fall'
+my_trib = 'feather'
+my_season = 'spring'
 
 # download and process telemetry data (takes a minute)
 alldat = download_process_telemetry(trib = my_trib, season = my_season, return_type = 'all')
-fishdat = alldat$fishdat; dat_fish_recv = alldat$dat_fish_recv
+
+dat_fish_recv = alldat$dat_fish_recv #full detection history for all fish
+fishdat = alldat$fishdat #summary of fish and tributary survival
+recvdat = alldat$recvdat #full receiver info
+recvs_location_summary = alldat$recvs_location_summary #summary by receiver location
+recvs_general_summary = alldat$recvs_general_summary #summary by receiver general location
+
 rm(alldat) #remove big object
+
+
 fishdat$fish_condition =  fishdat$fish_weight/fishdat$fish_length^3
 fishdat$release_location = factor(fishdat$release_location) #GAM requirement
 

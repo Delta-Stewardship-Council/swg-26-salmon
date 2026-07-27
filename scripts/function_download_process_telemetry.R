@@ -7,17 +7,18 @@
 ##      * season: in cases where we have data for multiple runs, specify the season (currently, 'fall' or 'spring')
 ##      * save_dir: directory where outputs should be saved (created if it doesn't exist). 
 ##      * return_type: 'fishdat' only returns data summary for each fish, "all" returns full detection history
+##      * censor_upstream: censor fish that move upstream more than X km; default = 5. (Set to a large number, e.g. 1000, to turn off censoring)
+##      * speed_limit: filter observations where the fish appears to move at a speed greater than X km/day (note: very short bursts of speed are allowed, see below)
 ##      * waterfall_plots: T or F, create and save waterfall plots for the movement paths of each fish (for processing purposes, to spot potential false detections)
 
 ## Outputs: a dataframe containing information about each fish released in the trib, and whether or not that fish survived ('survived.trib')
 
-require(rerddap); require(tidyr); require(dplyr); library(ggplot2); library(this.path)
+require(rerddap); require(tidyr); require(dplyr); library(geosphere); library(ggplot2); library(this.path)
 setwd(this.path::here()); setwd('..')
-#setwd(dirname(this.path::here()))
-#trib = 'feather'; season = 'spring'; save_dir = 'data_processed'; waterfall_plots = F
+#trib = 'feather'; season = 'spring'; save_dir = 'data_processed'; waterfall_plots = F; censor_upstream = 5; speed_limit = 120; return_type = "fishdat"; waterfall_plots = F
 
-download_process_telemetry = function(trib, season = NULL, save_dir = "data_processed", 
-                                      return_type = "fishdat", waterfall_plots = F){
+download_process_telemetry = function(trib, season = NULL, save_dir = "data_processed",return_type = "fishdat",
+                                      censor_upstream = 5, speed_limit = 120, waterfall_plots = F){
   
   ## Set up folder to save (if it doesn't exist)
   if(!dir.exists(save_dir)){ dir.create(save_dir) }
@@ -80,6 +81,8 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
                          subset(recvs, select = -c(receiver_serial_number, receiver_river_km, receiver_general_river_km, receiver_location, receiver_general_location)),
                          by = "dep_id")
   
+  print('done downloading and merging data')
+  
   ## Reorder data by fish and time
   dat_fish_recv = dat_fish_recv[order(dat_fish_recv$fish_id, dat_fish_recv$first_time), ]
   
@@ -88,6 +91,121 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
   
   ## Fish in studies of interest
   fish_studied = subset(fish, study_id %in% studyids)
+  
+  ## Receiver summary
+  recvs_studied = recvs %>% filter(dep_id %in% unique(dat_fish_recv$dep_id)) %>% 
+                            group_by(receiver_general_location) %>%
+                            arrange(receiver_general_river_km, receiver_location) %>%
+                            select(dep_id, receiver_general_location, receiver_location, receiver_region,
+                                   receiver_general_river_km, receiver_river_km, 
+                                   receiver_general_latitude, receiver_general_longitude,
+                                   latitude, longitude, receiver_start, receiver_end) %>%
+                           ungroup()
+  
+  recvs_location_summary = recvs_studied %>% filter(!duplicated(receiver_location)) %>%
+                                             select(-dep_id, -receiver_start, -receiver_end)
+  recvs_general_location_summary = recvs_location_summary %>% filter(!duplicated(receiver_general_location)) %>%
+                                         select(-receiver_river_km, -latitude, -longitude, -receiver_location)
+  
+  ### FILTERING ###
+  
+  colnames_copy = colnames(dat_fish_recv)
+  
+  ## Remove observations that:
+  
+  # Are a day or more before release, or more than 60 days after release
+  dat_fish_recv$release_tDiff = as.numeric(difftime(dat_fish_recv$first_time, dat_fish_recv$fish_release_date, units = 'days'))
+  dat_fish_recv = subset(dat_fish_recv, release_tDiff <= 60 & release_tDiff >= -1)
+  
+  # Follow a gap in observations greater than two weeks
+  filter_gaps <- dat_fish_recv %>% arrange(fish_id, first_time) %>% 
+                                   group_by(fish_id) %>%
+                                   mutate(obs_gap = as.numeric(difftime(first_time, lag(first_time, n = 1), units = 'days'))) %>%
+                                   filter(obs_gap > 14) %>%
+                                   mutate(censor_time1 = min(first_time)) %>%
+                                   select(fish_id, censor_time1)
+  dat_fish_recv = left_join(dat_fish_recv, filter_gaps, by = 'fish_id')
+  dat_fish_recv = subset(dat_fish_recv, is.na(censor_time1) | first_time < censor_time1)
+  
+  ## Are biologically unrealistic (more than x distance in y time, either by lat/long or river km)
+  dat_fish_recv$row_i = 1:nrow(dat_fish_recv)
+  
+  #initial step
+  filter_speeds = dat_fish_recv %>% arrange(fish_id, first_time) %>% 
+                                    group_by(fish_id) %>%
+                                    mutate(obs_gap = as.numeric(difftime(first_time, lag(first_time, n = 1), units = 'days')),
+                                           obs_gap2 = pmax(obs_gap, 1/24), #set minimum gap size of 1 hour (otherwise, a fish detected at receivers 100m apart 10 s apart appears to be going a speed of 864 km/day)
+                                           speed_latlon = distHaversine(cbind(receiver_general_longitude, receiver_general_latitude), cbind(lag(receiver_general_longitude, n = 1), lag(receiver_general_latitude, n=1)))/(1000*obs_gap2),
+                                           speed_river_km = abs(receiver_river_km - lag(receiver_river_km, n = 1))/obs_gap2,
+                                           filter_point = speed_latlon > speed_limit | speed_river_km > speed_limit)
+  filter_speeds_rows = filter_speeds %>% filter(filter_point == T) %>%
+                                         group_by(fish_id) %>%
+                                         summarize(filter_count = n(), row_filter = min(row_i)) 
+  
+  #remove first point flagged for each fish, then repeat process 
+  filter_speeds_rows_new = filter_speeds_rows
+  dat_fish_recv_filt = dat_fish_recv 
+  done_filtering = F
+  
+  while(done_filtering == F){
+    dat_fish_recv_filt = dat_fish_recv_filt %>%  filter(fish_id %in% unique(filter_speeds_rows_new$fish_id),
+                                                        !(row_i %in% unique(filter_speeds_rows$row_filter) ) )
+    filter_speeds_new  = dat_fish_recv_filt %>% arrange(fish_id, first_time) %>% 
+                                           group_by(fish_id) %>%
+                        mutate(obs_gap = as.numeric(difftime(first_time, lag(first_time, n = 1), units = 'days')),
+                               obs_gap2 = pmax(obs_gap, 1/24), #set minimum gap size of 1 hour (otherwise, a fish detected at receivers 100m apart 10 s apart appears to be going a speed of 864 km/day)
+                               speed_latlon = distHaversine(cbind(receiver_general_longitude, receiver_general_latitude), cbind(lag(receiver_general_longitude, n = 1), lag(receiver_general_latitude, n=1)))/(1000*obs_gap2),
+                               speed_river_km = abs(receiver_river_km - lag(receiver_river_km, n = 1))/obs_gap2,
+                               filter_point = speed_latlon > speed_limit | speed_river_km > speed_limit)
+    
+    if(sum(filter_speeds_new$filter_point, na.rm = T) > 0){
+      filter_speeds_rows_new = filter_speeds_new %>% filter(filter_point == T) %>%
+        group_by(fish_id) %>%
+        summarize(filter_count = n(), row_filter = min(row_i))
+      
+      filter_speeds_rows = rbind(filter_speeds_rows, filter_speeds_rows_new)
+      #print(nrow(filter_speeds_rows_new)) #fish remaining counter
+      
+    }else{
+      done_filtering = T
+    }
+    
+  }
+  
+  #remove all flagged rows from dat_fish_recv
+  dat_fish_recv = dat_fish_recv %>% filter(!(row_i %in% unique(filter_speeds_rows$row_filter) ))
+
+  
+  
+  ## Censor fish that swim upstream (more than X km)
+  dat_fish_recv = dat_fish_recv %>%
+    arrange(fish_id, first_time) %>% 
+    group_by(fish_id) %>%
+    mutate(receiver_general_river_km_next1 = dplyr::lead(receiver_general_river_km, n = 1),
+           receiver_general_location_next1 = dplyr::lead(receiver_general_location, n = 1),
+           receiver_location_next1 = dplyr::lead(receiver_location, n = 1),
+           too_far_upstream = receiver_general_river_km_next1 - receiver_general_river_km > censor_upstream) %>%
+    ungroup()
+  
+  #view censored fish/locations
+  upstream_censored_fish = subset(dat_fish_recv, too_far_upstream == T)[, c("fish_id", 'first_time', 'receiver_general_location', 'receiver_general_location_next1',
+                                                  'receiver_general_river_km','receiver_general_river_km_next1',
+                                                  "receiver_location", "receiver_location_next1", "too_far_upstream")]
+  
+  #censor fish when they swim upstream
+  dat_fish_recv =  dat_fish_recv %>% 
+                   arrange(fish_id, first_time) %>% 
+                   group_by(fish_id) %>%
+                   mutate(too_far_upstream_lag1 = dplyr::lag(too_far_upstream, n = 1)) %>%
+                   filter(cumsum(replace_na(too_far_upstream_lag1, F)) < 1) %>%
+                   ungroup()
+  
+  ## remove extra columns
+  dat_fish_recv = dat_fish_recv[, colnames_copy]
+  
+  
+  print('done filtering data')
+  
   
   ### FIND WHAT FISH SURVIVED THE TRIB ##
   # easy way: they 'survived' if they were last detected outside the trib
@@ -132,7 +250,8 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
   if(return_type == 'fishdat'){
     return(fish_studied_final)
   }else if(return_type == 'all'){
-    return(list(dat_fish_recv = dat_fish_recv, fishdat = fish_studied_final))
+    return(list(dat_fish_recv = dat_fish_recv, fishdat = fish_studied_final, recvdat = recvs_studied,
+                recvs_location_summary = recvs_location_summary, recvs_general_summary = recvs_general_location_summary))
   }
 
   
