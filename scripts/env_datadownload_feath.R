@@ -1,4 +1,4 @@
-
+# Environmental Data download for the Feather River
 
 library(CDECRetrieve)
 library(tidyverse)
@@ -32,14 +32,16 @@ stations.wtemp.f <- c("ORF", "FRA", "FTA", "FOW", "GRL", "VON")
 flow_feather <- download_cdec_flow(
   sta_list= stations.flow.f,
   start_date = start.date.f,
-  end_date = end.date.f
+  end_date = end.date.f,
+  dur_code = "E"
 )
 
 # use the fcn for temp data
 wtemp_feather <- download_cdec_wtemp(
   sta_list= stations.wtemp.f,
   start_date = start.date.f,
-  end_date = end.date.f
+  end_date = end.date.f,
+  dur_code = "E"
 )
 
 test.flow <- ORF_flow_data %>% 

@@ -1,63 +1,64 @@
-trib,fr.stars.reach,sr.stars.reach,name,station.id,agency,usgs.sta.num,type,type2,lat,lon
-American,American,,American River at Fair Oaks,AFO,USGS,USGS-11446500,Flow + temp,Env data,38.63546,-121.22773
-American,American,,American RIver at William B Pond Park,AWP,USGS,USGS-11446700,Temp,Env data,38.591,-121.332
-American,American,,American River Below Watt Ave Bridge,AWB,USGS,USGS-11446980,Temp,Env data,38.567,-121.387
-Sacramento,Ist,,Sacramento River at I St,IST,DWR,,Flow,Env data,38.58867,-121.50497
-Sacramento,Sacramento,,Sacramento River at Freeport,FPT,USGS,USGS-11447650,Flow + temp,Env data,38.45611,-121.5003
-Sacramento ,Sacramento,,Sacramento R Region Unimpared Runoff,SMU,DWR,,Flow,Env data,38.45,-121.5
-Sacramento ,Sacramento,,Sac Regional Wastewater Treatment Plant,SPE,Sacramento County,,Flow,Env data,38.441,-121.502
-Sacramento ,Sacramento,,Sacramento River at Hood ,SRH,DWR,,Temp,Env data,38.36798,-121.51996
-Sacramento ,Sacramento,,Green's Landing,GLN,USBR,,Temp,Env data,38.345,-121.546
-Sacramento ,Sutter_Steamboat,,Sutter Slough at Courtland,SUT,USBR,,Flow + temp,Env data,38.3286,-121.5772
-Sacramento ,Sutter_Steamboat,,Steamboat Slough BTW Sac R and Sutter ,SSS,USBR,,Flow,Env data,38.285,-121.587
-Sacramento ,Sutter_Steamboat,,Miner Slough at HWY 84 Bridge,HWB,USGS,USGS-11455165,Flow + temp,Env data,38.2917,-121.6308
-Sacramento ,Sutter_Steamboat,,Miner Slough Near Sac River,MIR,DWR,,Flow + temp,Env data,38.23603,-121.66606
-Sacramento ,Sutter_Steamboat,,Cache Slough at Ryer Island,RY1,USGS,USGS-11455350,Flow + temp,Env data,38.2128,-121.6692
-Sacramento ,Sutter_Steamboat,,Cache Slough above Ryer Island Ferry,RYF,USBR,USGS-11455385,Flow + temp,Env data,38.19385,-121.65801
-Sacramento ,Sutter_Steamboat,,Steamboat Slough BTW Sac R and Sutter ,SSS,USBR,,Flow + temp,Env data,38.285,-121.587
-Sacramento ,Sutter_Steamboat,,Steamboat Slough NR Sac R,SXS,DWR,,Flow + temp,Env data,38.19127,-121.63788
-Sacramento ,Sacramento,,Sacramento River Above Delta Cross Channel,SDC,USBR,USGS-11447890,Flow + temp,Env data,38.257,-121.518
-Sacramento ,Sacramento,,Sacramento River at Walnut Grove EC,SWE,DWR,,Temp,Env data,38.24185,-121.51477
-Sacramento ,Sacramento,,Sacramento River Below Georgiana Slough,GES,USBR,USGS-11447905,Flow + temp,Env data,38.2389,-121.5234
-Sacramento ,Sacramento,,Sacramento River Downstream of Isleton,SOI,DWR,,Flow + temp,Env data,38.17548,-121.65686
-Sacramento ,Sacramento,,Sacramento River at Rio Vista Bridge,RVB,DWR,,Temp,Env data,38.15974,-121.68636
-Sacramento ,Sacramento,,Sacramento River at Rio Vista Bridge,SRV,USGS,USGS-11455420,Flow + temp,Env data,38.16,-121.686
-Sacramento ,Sacramento,,Three Mile Slough,TMS,DWR,,Temp,Env data,38.106,-121.7
-Sacramento ,Sacramento,,Sacramento at Decker Island,SDI,USGS,USGS-11455478,Flow + temp,Env data,38.0934,-121.736
-Sacramento ,Sacramento,,Sacramento River Below Toland Landing,M13,USBR,,Flow + temp,Env data,38.07781,-121.76729
-Sacramento ,Sacramento,,Sacramento River Near Sherman Island,SSI,DWR,,Temp,Env data,38.0741,-121.76174
-Sacramento ,Sacramento,,Sacramento River at Channel Marker 10,C10,USGS,USGS-11455495,Temp,Env data,38.05983,-121.79989
-Sacramento ,Sacramento,,Sacramento River at Channel Marker 5,C05,USGS,USGS-11455498,Temp,Env data,38.06578,-121.83581
-Sacramento ,Sacramento,,Collinsville on Sacramento River,CSE,DWR,,Temp,Env data,38.074,-121.8501
-Sacramento ,Sacramento,,8 River Full Natural Flow Index,8RI,DWR,,Flow,Env data,38.04722,-121.8853
-Sacramento ,Sacramento,,Sacramento River at Mallard Island,MAL,DWR,,Temp,Env data,38.0428,-121.92009
-Sacramento ,Georgiana,,Georgiana Slough at Sacramento River,GSS,USBR,,Flow + temp,Env data,38.237,-121.518
-Sacramento,Delta Cross to Mokelumne,,Delta Cross Channel Between Sac and Snodgrass,DLC,USBR,,Flow + temp,Env data,38.245,-121.505
-Sacramento,Delta Cross to Mokelumne,,North Mokelumne River at W Walnut Grove Rd,NMR,USBR,,Flow + temp,Env data,38.2232,-121.5071
-Sacramento,Delta Cross to Mokelumne,,South Mokelumne River at Walnut Grove Rd,SMR,USBR,,Flow + temp,Env data,38.2255,-121.4911
-Sacramento,Delta Cross to Mokelumne,,Staten Island,STI,USBR,,Temp,Env data,38.11692,-121.49885
-Sacramento,Interior Delta,,Mokelumne River at San Joaquin River,MOK,USBR,,Flow + temp,Env data,38.1061,-121.5711
-Stanislaus,SJR,,Goodwin Dam,GDW,USBR,,Flow,Env data,37.8628,-120.6297
-Stanislaus,SJR,,Stanislaus River at Goodwin Canyon,GDC,CDFW,,Temp,Env data,37.858,-120.635
-Stanislaus,SJR,,Knights Ferry at Sonora Road Bridge,KFS,CDFW,,Temp,Env data,37.819,-120.667
-Stanislaus,SJR,,Stanislaus River near Orange Blossom Bridge,OBS,CDFW,,Temp,Env data,37.791,-120.765
-Stanislaus,SJR,,Stanislaus River at Oakdale,SOK,USGS,,Temp,Env data,37.777,-120.852
-Stanislaus,SJR,,Stainislaus River at Oakdale Rec Area,ORA,CDFW,,Temp,Env data,37.771,-120.867
-Stanislaus,SJR,,Stanislaus River at Gambini Property,GMB,CDFW,,Temp,Env data,37.772,-120.888
-Stanislaus,SJR,,Stanislaus River at Jacob Meyers Park,JMP,CDFW,,Temp,Env data,37.743,-120.942
-Stanislaus,SJR,,Stanislaus River at Jacob Meyers Park,SRJ,CDFW,,Temp,Env data,37.7469,-120.9713
-Stanislaus,SJR,,Ripon,RPN,USBR,,Temp,Env data,37.72986,-121.11013
-Stanislaus,SJR,,Stanislaus River at Ripon,RIP,USGS,USGS-113030000,Flow + temp,Env data,37.72965,-121.1105
-Feather,Oroville,,Oroville Fish Hatchery (Feather River),ORF,DWR,,Flow + temp,Env data,39.517,-121.55
-Feather,Oroville,,Feather River at Mile 61.6,FRA,DWR,,Temp,Env data,39.468,-121.597
-Feather,Oroville,,Feather River below Thermilto Afterbay,FTA,DWR,,Temp,Env data,39.45292,-121.63954
-Feather,Oroville,,Feather River OWA South Boundary Near Gridley,FOW,DWR,,Temp,Env data,39.4025,-121.6194
-Feather,Gridley,,Feather River near Gridley,GRL,DWR,,Flow + temp,Env data,39.36658,-121.64737
-Feather,Boyds,,Feather River at Boyd's Landing Above Star Bend,FSB,DWR,,Flow,Env data,39.0455,-121.61044
-Sacramento,Boyds,,Sacramento River at Verona,VON,DWR,,Flow + temp,Env data,38.77415,-121.59807
-American,Lower- RM9,,American River at Watt Ave,,CDFW,,RST,RST,38.566909,-121.385043
-Feather,Upper-RM61,,Feather River Eye Riffle,,DWR,,RST,RST,39.456267,-121.615
-Feather,Upper-RM45,,Feather River Herringer Riffle,,DWR,,RST,RST,39.315783,-121.62477
-Feather,Lower-RM17,,Feather River Star Bend,,CDFW,,RST,RST,39.00506,-121.57924
-Stanislaus,RM8.6,,Stanislaus River at Caswell State Park,,Pac States,,RST,RST,37.701969,-121.178878
-Stanislaus,RM8.40.1,,Stanislaus River near Oakdale,,FishBio,,RST,RST,37.770972,-120.867708
+trib,fr.stars.reach,sr.stars.reach,name,station.id,agency,usgs.sta.num,type,type2,lat,lon,
+American,American,,American River at Fair Oaks,AFO,USGS,USGS-11446500,Flow + temp,Env data,38.63546,-121.22773,
+American,American,,American RIver at William B Pond Park,AWP,USGS,USGS-11446700,Temp,Env data,38.591,-121.332,
+American,American,,American River Below Watt Ave Bridge,AWB,USGS,USGS-11446980,Temp,Env data,38.567,-121.387,
+Sacramento,Ist,,Sacramento River at I St,IST,DWR,,Flow,Env data,38.58867,-121.50497,
+Sacramento,Sacramento,,Sacramento River at Freeport,FPT,USGS,USGS-11447650,Flow + temp,Env data,38.45611,-121.5003,
+Sacramento ,Sacramento,,Sacramento R Region Unimpared Runoff,SMU,DWR,,Flow,Env data,38.45,-121.5,
+Sacramento ,Sacramento,,Sac Regional Wastewater Treatment Plant,SPE,Sacramento County,,Flow,Env data,38.441,-121.502,
+Sacramento ,Sacramento,,Sacramento River at Hood ,SRH,DWR,,Temp,Env data,38.36798,-121.51996,
+Sacramento ,Sacramento,,Green's Landing,GLN,USBR,,Temp,Env data,38.345,-121.546,
+Sacramento ,Sutter_Steamboat,,Sutter Slough at Courtland,SUT,USBR,,Flow + temp,Env data,38.3286,-121.5772,
+Sacramento ,Sutter_Steamboat,,Steamboat Slough BTW Sac R and Sutter ,SSS,USBR,,Flow,Env data,38.285,-121.587,
+Sacramento ,Sutter_Steamboat,,Miner Slough at HWY 84 Bridge,HWB,USGS,USGS-11455165,Flow + temp,Env data,38.2917,-121.6308,
+Sacramento ,Sutter_Steamboat,,Miner Slough Near Sac River,MIR,DWR,,Flow + temp,Env data,38.23603,-121.66606,
+Sacramento ,Sutter_Steamboat,,Cache Slough at Ryer Island,RY1,USGS,USGS-11455350,Flow + temp,Env data,38.2128,-121.6692,
+Sacramento ,Sutter_Steamboat,,Cache Slough above Ryer Island Ferry,RYF,USBR,USGS-11455385,Flow + temp,Env data,38.19385,-121.65801,
+Sacramento ,Sutter_Steamboat,,Steamboat Slough BTW Sac R and Sutter ,SSS,USBR,,Flow + temp,Env data,38.285,-121.587,
+Sacramento ,Sutter_Steamboat,,Steamboat Slough NR Sac R,SXS,DWR,,Flow + temp,Env data,38.19127,-121.63788,
+Sacramento ,Sacramento,,Sacramento River Above Delta Cross Channel,SDC,USBR,USGS-11447890,Flow + temp,Env data,38.257,-121.518,
+Sacramento ,Sacramento,,Sacramento River at Walnut Grove EC,SWE,DWR,,Temp,Env data,38.24185,-121.51477,
+Sacramento ,Sacramento,,Sacramento River Below Georgiana Slough,GES,USBR,USGS-11447905,Flow + temp,Env data,38.2389,-121.5234,
+Sacramento ,Sacramento,,Sacramento River Downstream of Isleton,SOI,DWR,,Flow + temp,Env data,38.17548,-121.65686,
+Sacramento ,Sacramento,,Sacramento River at Rio Vista Bridge,RVB,DWR,,Temp,Env data,38.15974,-121.68636,
+Sacramento ,Sacramento,,Sacramento River at Rio Vista Bridge,SRV,USGS,USGS-11455420,Flow + temp,Env data,38.16,-121.686,
+Sacramento ,Sacramento,,Three Mile Slough,TMS,DWR,,Temp,Env data,38.106,-121.7,
+Sacramento ,Sacramento,,Sacramento at Decker Island,SDI,USGS,USGS-11455478,Flow + temp,Env data,38.0934,-121.736,
+Sacramento ,Sacramento,,Sacramento River Below Toland Landing,M13,USBR,,Flow + temp,Env data,38.07781,-121.76729,
+Sacramento ,Sacramento,,Sacramento River Near Sherman Island,SSI,DWR,,Temp,Env data,38.0741,-121.76174,
+Sacramento ,Sacramento,,Sacramento River at Channel Marker 10,C10,USGS,USGS-11455495,Temp,Env data,38.05983,-121.79989,
+Sacramento ,Sacramento,,Sacramento River at Channel Marker 5,C05,USGS,USGS-11455498,Temp,Env data,38.06578,-121.83581,
+Sacramento ,Sacramento,,Collinsville on Sacramento River,CSE,DWR,,Temp,Env data,38.074,-121.8501,
+Sacramento ,Sacramento,,8 River Full Natural Flow Index,8RI,DWR,,Flow,Env data,38.04722,-121.8853,
+Sacramento ,Sacramento,,Sacramento River at Mallard Island,MAL,DWR,,Temp,Env data,38.0428,-121.92009,
+Sacramento ,Georgiana,,Georgiana Slough at Sacramento River,GSS,USBR,,Flow + temp,Env data,38.237,-121.518,
+Sacramento,Delta Cross to Mokelumne,,Delta Cross Channel Between Sac and Snodgrass,DLC,USBR,,Flow + temp,Env data,38.245,-121.505,
+Sacramento,Delta Cross to Mokelumne,,North Mokelumne River at W Walnut Grove Rd,NMR,USBR,,Flow + temp,Env data,38.2232,-121.5071,
+Sacramento,Delta Cross to Mokelumne,,South Mokelumne River at Walnut Grove Rd,SMR,USBR,,Flow + temp,Env data,38.2255,-121.4911,
+Sacramento,Delta Cross to Mokelumne,,Staten Island,STI,USBR,,Temp,Env data,38.11692,-121.49885,
+Sacramento,Interior Delta,,Mokelumne River at San Joaquin River,MOK,USBR,,Flow + temp,Env data,38.1061,-121.5711,
+Stanislaus,SJR,,Goodwin Dam,GDW,USBR,,Flow,Env data,37.8628,-120.6297,
+Stanislaus,SJR,,Stanislaus River at Goodwin Canyon,GDC,CDFW,,Temp,Env data,37.858,-120.635,
+Stanislaus,SJR,,Knights Ferry at Sonora Road Bridge,KFS,CDFW,,Temp,Env data,37.819,-120.667,
+Stanislaus,SJR,,Stanislaus River near Orange Blossom Bridge,OBS,CDFW,,Temp,Env data,37.791,-120.765,
+Stanislaus,SJR,,Stanislaus River at Oakdale,SOK,USGS,,Temp,Env data,37.777,-120.852,
+Stanislaus,SJR,,Stainislaus River at Oakdale Rec Area,ORA,CDFW,,Temp,Env data,37.771,-120.867,
+Stanislaus,SJR,,Stanislaus River at Gambini Property,GMB,CDFW,,Temp,Env data,37.772,-120.888,
+Stanislaus,SJR,,Stanislaus River at Jacob Meyers Park,JMP,CDFW,,Temp,Env data,37.743,-120.942,
+Stanislaus,SJR,,Stanislaus River at Jacob Meyers Park,SRJ,CDFW,,Temp,Env data,37.7469,-120.9713,
+Stanislaus,SJR,,Ripon,RPN,USBR,,Temp,Env data,37.72986,-121.11013,
+Stanislaus,SJR,,Stanislaus River at Ripon,RIP,USGS,USGS-113030000,Flow + temp,Env data,37.72965,-121.1105,
+Feather,Oroville,,Oroville Fish Hatchery (Feather River),ORF,DWR,,Flow + temp,Env data,39.517,-121.55,
+Feather,Oroville,,Feather River at Mile 61.6,FRA,DWR,,Temp,Env data,39.468,-121.597,
+Feather,Oroville,,Feather River below Thermilto Afterbay,FTA,DWR,,Temp,Env data,39.45292,-121.63954,
+Feather,Oroville,,Feather River OWA South Boundary Near Gridley,FOW,DWR,,Temp,Env data,39.4025,-121.6194,
+Feather,Gridley,,Feather River near Gridley,GRL,DWR,,Flow + temp,Env data,39.36658,-121.64737,
+Feather,Boyds,,Feather River at Boyd's Landing Above Star Bend,FSB,DWR,,Flow,Env data,39.0455,-121.61044,
+Sacramento,Boyds,,Sacramento River at Verona,VON,DWR,,Flow + temp,Env data,38.77415,-121.59807,
+American,Lower- RM9,,American River at Watt Ave,,CDFW,,RST,RST,38.566909,-121.385043,
+Feather,Upper-RM61,,Feather River Eye Riffle,,DWR,,RST,RST,39.456267,-121.615,
+Feather,Upper-RM45,,Feather River Herringer Riffle,,DWR,,RST,RST,39.315783,-121.62477,
+Feather,Lower-RM17,,Feather River Star Bend,,CDFW,,RST,RST,39.00506,-121.57924,
+Stanislaus,RM8.6,,Stanislaus River at Caswell State Park,,Pac States,,RST,RST,37.701969,-121.178878,
+Stanislaus,RM8.40.1,,Stanislaus River near Oakdale,,FishBio,,RST,RST,37.770972,-120.867708,
+Stanislaus,SJR,,Stanislaus River at Kotitz,KOT,DWR,,Flow,Env data,37.69978,-121.17019,
