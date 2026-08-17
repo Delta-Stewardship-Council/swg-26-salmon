@@ -241,7 +241,7 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
                geom_step(aes(x = first_time, y = receiver_general_river_km, group = fish_id), alpha = .5) +
                theme_classic() + 
                labs(x = "Date", y = "Receiver Location (river km)", title = paste0("Fish Detections (", study_i, ")")) 
-      ggsave(plot = plot_i, filename = paste0(save_dir, "/waterfall_plots_", study_i, ".png"), width = 6, height = 6)         
+      ggsave(plot = plot_i, filename = paste0(save_dir, "/waterfall_plots/waterfall_plots_", study_i, ".png"), width = 6, height = 6)         
     }
   }
   

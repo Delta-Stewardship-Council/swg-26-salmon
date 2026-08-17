@@ -4,11 +4,14 @@
 ## the width of each line is based on the percent of fish leaving i that are next
 ## observed at receiver location j 
 ## Inputs:
-##    data: full set of telemetry observations, including receiver location info
+##    data: full set of telemetry observations, including receiver location info ('dat_fish_recv' object)
 ##    study_i: optional, specify a study id to filter by
 ##    min_count: if fewer than X fish move between i and j, disregard this connection
 ##    filter_perc: if fewer than X proportion of fish leaving i go to j (after filtering
 ##                 for min_count), the line between i and j is not plotted.
+##    min_rec_dist: general receiver locations within this distance (km) will be grouped together
+##    plot_all_names: set to TRUE to label all receiver general locations on the network map; FALSE only 
+##                    labels one for each group
 ## Outputs: ggplot of river network
 
 library(reshape2); library(igraph); library(ggplot2); library(ggrepel); library(this.path); library(geosphere)
@@ -16,7 +19,7 @@ setwd(this.path::here()); setwd('..')
 #study_i = NULL; filter_perc = 20; min_count = 2; min_rec_dist = 1; save_dir = 'figures'
 
 plot_river_network = function(data, study_i = NULL, filter_perc = 10, min_count = 2, min_rec_dist = 1,
-                              save_dir = 'figures'){
+                              plot_all_names = T, save_dir = 'figures'){
   
   ## Set up folder to save (if it doesn't exist)
   if(!dir.exists(save_dir)){ dir.create(save_dir) }
@@ -39,7 +42,8 @@ plot_river_network = function(data, study_i = NULL, filter_perc = 10, min_count 
   recv_info = data[!duplicated(data$receiver_general_location), c("receiver_general_location",
                                                                   "receiver_general_latitude",
                                                                   "receiver_general_longitude",
-                                                                  "receiver_general_river_km")]
+                                                                  "receiver_general_river_km",
+                                                                  'receiver_region')]
   ## group receivers that are sufficiently close
   #recv_info$new_rec_name = case_match(recv_info$receiver_general_location,
   #                                    c("GoldenGateE", "GoldenGateW") ~ "GoldenGate",
@@ -119,7 +123,15 @@ plot_river_network = function(data, study_i = NULL, filter_perc = 10, min_count 
   ## most important receivers
   recv_important = subset(data_recv_sub, count_next > 10 | rec_group == 2) #subset(data_recv_sub, rec_group %in% c(1, 2, max(data_recv_sub$rec_group))| count_next >= sort(data_recv_sub$count_next, decreasing = T)[10])
   recv_important = subset(recv_info_sub, rec_group %in% unique(recv_important$rec_group) | rec_group %in% unique(recv_important$next_rec_group))
+  recv_important_all = recv_important %>% group_by(rec_group) %>% summarize(all_names = paste0(receiver_general_location, collapse = ', '))
   recv_important = subset(recv_important, !duplicated(rec_group))
+  recv_important = left_join(recv_important, recv_important_all, by = 'rec_group')
+  
+  ## regions
+  recv_important$receiver_general_region = ifelse(recv_important$receiver_region %in% c("Feather_R", "Yolo Bypass"), "Feather River", NA)
+  recv_important$receiver_general_region = ifelse(recv_important$receiver_region %in% c("Lower Sac R"), "Lower Sac", recv_important$receiver_general_region)
+  recv_important$receiver_general_region = ifelse(recv_important$receiver_region %in% c("North Delta", "West Delta"), "Delta", recv_important$receiver_general_region)
+  recv_important$receiver_general_region = ifelse(recv_important$receiver_region %in% c("Carquinez Strait", "SF Bay"), "SF Bay", recv_important$receiver_general_region)
   
   ### Plotting
   
@@ -136,16 +148,25 @@ plot_river_network = function(data, study_i = NULL, filter_perc = 10, min_count 
     coord_fixed() + theme_classic() 
   
   ## simplified network map
-  network_plot = ggplot(data_recv_sub) + 
-    geom_text_repel(data = recv_important, aes(y = rec_group, x = plot_x_sc, label = receiver_general_location),
-                    nudge_x = ifelse(recv_important$plot_x_sc>0 | (recv_important$plot_x_sc==0 & recv_important$rec_group%%2!=0), 2, -2), color = 'red')+
+  if(plot_all_names == T){
+    network_plot = ggplot(data_recv_sub) + 
+      geom_label_repel(data = recv_important, aes(y = rec_group, x = plot_x_sc, label = stringr::str_wrap(all_names, 20), color = receiver_general_region),
+                       nudge_x = ifelse(recv_important$plot_x_sc>0 | (recv_important$plot_x_sc==0 & recv_important$rec_group%%2!=0), 2, -2), size = 3)
+  }else{
+    network_plot = ggplot(data_recv_sub) + 
+      geom_text_repel(data = recv_important, aes(y = rec_group, x = plot_x_sc, label = receiver_general_location, color = receiver_general_region),
+                       nudge_x = ifelse(recv_important$plot_x_sc>0 | (recv_important$plot_x_sc==0 & recv_important$rec_group%%2!=0), 2, -2))
+  }
+  
+network_plot = network_plot +
     geom_segment(aes(y = rec_group, x = plot_x_sc.i,
                      yend = next_rec_group, xend = plot_x_sc.j,
                      linewidth = perc_next),
                  arrow = arrow(length = unit(0.2,"cm")))+
     scale_linewidth_binned(range = c(0.01, 1), n.breaks = 8)+
     #geom_point(data = release_info, aes(x = release_longitude, y = release_river_km, color = release_location))+
-    theme_classic() + theme(axis.text = element_blank(), legend.position = 'none')+
+    theme_classic() + 
+    theme(axis.text = element_blank(), axis.ticks = element_blank(), axis.line  = element_blank(), legend.position = 'none')+
     labs(x = NULL, y = NULL, linewidth = "% of fish")
 
   save_plot_name = paste0(save_dir, "/network_plots_", gsub(" ", "", unique(data$fish_type)), "_",
