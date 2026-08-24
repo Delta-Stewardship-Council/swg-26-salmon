@@ -10,16 +10,17 @@
 ##    filter_perc: if fewer than X proportion of fish leaving i go to j (after filtering
 ##                 for min_count), the line between i and j is not plotted.
 ##    min_rec_dist: general receiver locations within this distance (km) will be grouped together
+##    plot_only_consecutive: if T, only shows paths between consecutive receivers; if F, plots all fish paths 
 ##    plot_all_names: set to TRUE to label all receiver general locations on the network map; FALSE only 
 ##                    labels one for each group
 ## Outputs: ggplot of river network
 
 library(reshape2); library(igraph); library(ggplot2); library(ggrepel); library(this.path); library(geosphere)
 setwd(this.path::here()); setwd('..')
-#study_i = NULL; filter_perc = 20; min_count = 2; min_rec_dist = 1; save_dir = 'figures'
+#study_i = NULL; filter_perc = 10; min_count = 2; min_rec_dist = 1; save_dir = 'figures'
 
 plot_river_network = function(data, study_i = NULL, filter_perc = 10, min_count = 2, min_rec_dist = 1,
-                              plot_all_names = T, save_dir = 'figures'){
+                              plot_only_consecutive = F, plot_all_names = T, save_dir = 'figures'){
   
   ## Set up folder to save (if it doesn't exist)
   if(!dir.exists(save_dir)){ dir.create(save_dir) }
@@ -99,10 +100,26 @@ plot_river_network = function(data, study_i = NULL, filter_perc = 10, min_count 
   data_recv = data_sub %>% group_by(rec_group, next_rec_group) %>%
                            summarise(count_next = n(), .groups = "drop_last") %>% 
                            filter(count_next >= min_count) %>%
-                           mutate(perc_next = (count_next / sum(count_next)) * 100)
+                           mutate(perc_next = (count_next / sum(count_next)) * 100,
+                                  rec_pair = paste(rec_group, next_rec_group, sep = "_"))
+  
+  ## find unique fish paths of *consecutive* receivers
+  conscpath = data.frame()
+  for(rec_i in unique(data_recv$rec_group)){
+    nextgroups = subset(data_recv, rec_group == rec_i & next_rec_group < rec_group)
+    next2groups = subset(data_recv, rec_group %in% unique(nextgroups$next_rec_group) & next_rec_group < rec_group)
+    conscpath_i = subset(nextgroups, !(next_rec_group %in% unique(next2groups$next_rec_group)))
+    conscpath = rbind(conscpath, conscpath_i)
+  }
   
   ## filter by % 
   data_recv_sub = subset(data_recv, perc_next > filter_perc)
+  
+  ## merge consecutive path info
+  data_recv_sub$consecutive = ifelse(data_recv_sub$rec_pair %in% conscpath$rec_pair, 1, 0)
+  if(plot_only_consecutive == T){
+    data_recv_sub = subset(data_recv_sub, consecutive == 1)
+  }
   
   ## assign receiver labels for plotting
   recv_info_sub = subset(recv_info, rec_group %in% unique(data_recv_sub$rec_group) | rec_group %in% unique(data_recv_sub$next_rec_group))

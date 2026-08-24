@@ -8,7 +8,7 @@ source("scripts/functions_misc.R")
 my_trib = 'feather'
 my_season = 'spring'
 speed_limit = 120
-censor_upstream = 5
+censor_upstream = 3
 
 # download and process telemetry data (takes a minute)
 alldat = download_process_telemetry(trib = my_trib, season = my_season, return_type = 'all',
@@ -24,7 +24,9 @@ rm(alldat) #remove big object
 
 
 # make network plot
-network_plot = plot_river_network(data=dat_fish_recv, filter_perc = 10, plot_all_names = F, save_dir = 'figures')
+network_plot = plot_river_network(data=dat_fish_recv, filter_perc = 10,
+                                  plot_only_consecutive = T, plot_all_names = T,
+                                  save_dir = 'figures')
 network_plot
 
 
