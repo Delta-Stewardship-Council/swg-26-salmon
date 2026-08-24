@@ -222,6 +222,7 @@ download_process_telemetry = function(trib, season = NULL, save_dir = "data_proc
   
   ## rearrange columns for convenience
   fish_studied_final = fish_studied %>% select(fish_id, study_id, survived.trib, fish_release_date, release_location, release_latitude, release_longitude, fish_length, fish_weight, everything())
+  class(fish_studied_final) <- c("data.frame", "tabledap") #ensures that return() returns a data.frame object, not a tabledap object which results in an error
   
   
   ### PLOTTING ###
