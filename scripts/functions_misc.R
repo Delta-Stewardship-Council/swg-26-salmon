@@ -15,7 +15,7 @@
 ##                    labels one for each group
 ## Outputs: ggplot of river network
 
-library(reshape2); library(igraph); library(ggplot2); library(ggrepel); library(this.path); library(geosphere)
+library(reshape2); library(igraph); library(ggplot2); library(ggrepel); library(this.path); library(geosphere); library(ggspatial)
 setwd(this.path::here()); setwd('..')
 #study_i = NULL; filter_perc = 10; min_count = 2; min_rec_dist = 1; save_dir = 'figures'
 
