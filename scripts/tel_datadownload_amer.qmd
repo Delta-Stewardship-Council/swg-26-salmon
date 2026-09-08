@@ -1,0 +1,12 @@
+# Set Up
+```{r}
+require(rerddap); require(tidyr); require(dplyr); library(geosphere); library(ggplot2); library(this.path)
+```
+
+# Download data
+```{r}
+#run download_process_telemetry function on american river
+download_process_telemetry(trib = 'american', season = NULL, save_dir = "data_processed", return_type = "all", censor_upstream = 5, speed_limit = 120, waterfall_plots = T)
+```
+
+
