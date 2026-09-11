@@ -3,6 +3,7 @@ library(ggplot2)
 
 source("scripts/function_download_process_telemetry.R")
 source("scripts/function_basic_survival_regression.R")
+source("scripts/functions_model_setup.R")
 source("scripts/functions_misc.R")
 
 my_trib = 'feather'
@@ -28,6 +29,23 @@ network_plot = plot_river_network(data=dat_fish_recv, filter_perc = 10,
                                   plot_only_consecutive = T, plot_all_names = T,
                                   save_dir = 'figures')
 network_plot
+
+# create list of reaches, and receivers defining the end of each reach
+reaches_list = list()
+reaches_list[[1]] = c("Gridley", "FR_Gridley_Rel_DS", "FR_Gridley_Rel")
+reaches_list[[2]] = c("BoydsPump", 'FR_Boyds_Rel_Rec', 'FR_Boyds_Rel') #end of first reach
+reaches_list[[3]] = c("Blw_FRConf", "FR_Verona_Bot", "SutterWestSacRiver") #end of second reach
+reaches_list[[4]] = c("TowerBridge", 'I80-50_Br') #end of third reach... etc.
+reaches_list[[5]] = c("Sac_Rio_Vista_1", "Sac_Rio_Vista_2", "RioVistaBr")
+reaches_list[[6]] = c("BeniciaW", "BeniciaE")
+reaches_list[[7]] = c("GoldenGateW", "GoldenGateE")
+
+plot_reaches(recvs_location_summary, reaches_list) #quick plot of the reaches
+
+# aggregate fish detection history by reach
+
+
+
 
 
 ## fish length vs weight

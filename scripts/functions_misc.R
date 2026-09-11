@@ -233,3 +233,29 @@ network_plot = network_plot +
   
   return(network_plot)
 } 
+
+
+
+## This function makes a quick plot of reaches and the receiver locations used to define each reach
+
+plot_reaches = function(recvs_location_summary, reaches_list){
+  
+  data = subset(recvs_location_summary, receiver_general_location %in% unique(unlist(reaches_list)))
+  
+  reaches_sub = subset(data, receiver_general_location %in% sapply(reaches_list, function(x) x[1]))
+  reaches_sub = reaches_sub[!duplicated(reaches_sub$receiver_general_location), ]
+  reaches_sub = reaches_sub[order(reaches_sub$receiver_general_river_km, decreasing = T), ]
+  
+  print(ggplot() + 
+    ggspatial::annotation_map_tile(type = "cartolight", zoom = 10)+
+    coord_sf(xlim = c(-123.0, -120.7), ylim= c(37.7, 39.6), crs = 4326)+
+    geom_spatial_segment(data = reaches_sub, aes(x = longitude, y = latitude,
+                                                 xend = lead(longitude), yend = lead(latitude)),
+                         arrow = arrow(length = unit(0.2, "cm")), color = 'red') +
+    geom_spatial_point(data = data, aes(x = longitude, y = latitude))+
+    theme_classic() + labs(x = NULL, y = NULL))
+  
+}
+
+
+
