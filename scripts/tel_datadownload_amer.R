@@ -5,9 +5,9 @@ require(rerddap); require(tidyr); require(dplyr); library(geosphere); library(gg
 setwd(this.path::here()); setwd('..')
 library(ggplot2)
 
-source("scripts/function_download_process_telemetry.R")
-source("scripts/function_basic_survival_regression.R")
-source("scripts/functions_misc.R")
+source("function_download_process_telemetry.R")
+source("function_basic_survival_regression.R")
+source("functions_misc.R")
 
 
 # Download data
