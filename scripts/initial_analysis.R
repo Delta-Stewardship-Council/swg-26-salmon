@@ -30,23 +30,51 @@ network_plot = plot_river_network(data=dat_fish_recv, filter_perc = 10,
                                   save_dir = 'figures')
 network_plot
 
-# create list of reaches, and receivers defining the end of each reach
+# create list of general receiver locations defining each reach
 reaches_list = list()
-reaches_list[[1]] = c("Gridley", "FR_Gridley_Rel_DS", "FR_Gridley_Rel")
-reaches_list[[2]] = c("BoydsPump", 'FR_Boyds_Rel_Rec', 'FR_Boyds_Rel') #end of first reach
-reaches_list[[3]] = c("Blw_FRConf", "FR_Verona_Bot", "SutterWestSacRiver") #end of second reach
-reaches_list[[4]] = c("TowerBridge", 'I80-50_Br') #end of third reach... etc.
+reaches_list[[1]] = c("Gridley", "FR_Gridley_Rel_DS", "FR_Gridley_Rel") #start of first reach
+reaches_list[[2]] = c("BoydsPump", 'FR_Boyds_Rel_Rec', 'FR_Boyds_Rel') #start of second reach
+reaches_list[[3]] = c("Blw_FRConf", "FR_Verona_Bot", "SutterWestSacRiver") #start of third reach... etc.
+reaches_list[[4]] = c("TowerBridge", 'I80-50_Br') 
 reaches_list[[5]] = c("Sac_Rio_Vista_1", "Sac_Rio_Vista_2", "RioVistaBr")
 reaches_list[[6]] = c("BeniciaW", "BeniciaE")
 reaches_list[[7]] = c("GoldenGateW", "GoldenGateE")
 
 plot_reaches(recvs_location_summary, reaches_list) #quick plot of the reaches
 
+# check receiver coverage 
+recvs_coverage = get_reach_coverage(recvdat=recvdat, fishdat=fishdat, reaches_list=reaches_list, minDays = 45)
+    # for each receiver group / fish release group pair,
+    # complete_coverage = T indicates that at least one receiver is present at the site from [release date, release date + X], where e.g. X = minDays
+    # partial_coverage = T (with complete_coverage = F) indicates that some, but not all of the date range [release date, release date + X],
+    #                       has one or more receivers. Should be manually inspected to see if the coverage is sufficient or not.
+    # parital_coverage = F indicates that no receivers were present at the site anytime during [release date, release date + X]. 
+    #                        This site should definitely be excluded from the survival model for that year (e.g., fixing detection prob to 0)
+
+recvs_coverage_check = subset(recvs_coverage, partial_coverage == T & complete_coverage == F)
+recvs_coverage_exclude = subset(recvs_coverage, partial_coverage == F)
+
+
+# corresponding to reaches_list above, manually dictate which receiver sites should *not* be included for a specific study year
+excl_reaches_studies_list = list()
+excl_reaches_studies_list[[1]] = NA 
+excl_reaches_studies_list[[2]] = NA
+excl_reaches_studies_list[[3]] = NA 
+excl_reaches_studies_list[[4]] = NA
+excl_reaches_studies_list[[5]] = c("FR_Spring_2013") 
+excl_reaches_studies_list[[6]] = c("FR_Spring_2015")
+excl_reaches_studies_list[[7]] = c("FR_Spring_2014", "FR_Spring_2015") #maybe 2013 too? coverage began a week after fish release
+
 # aggregate fish detection history by reach
 
 
 
 
+
+
+
+
+### Basic analyses ###
 
 ## fish length vs weight
 ggplot(fishdat) + geom_point(aes(x = fish_length, y = fish_weight), alpha = .3) +
